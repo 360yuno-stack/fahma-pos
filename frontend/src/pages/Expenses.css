@@ -1,0 +1,2 @@
+.expenses-page { animation: fadeIn 0.3s ease; }
+.expense-amount { font-weight: 600; color: var(--color-danger); }

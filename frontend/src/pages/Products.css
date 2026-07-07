@@ -1,0 +1,14 @@
+.products-page {
+  animation: fadeIn 0.3s ease;
+}
+
+.product-name-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.product-name-cell .product-info .product-desc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}

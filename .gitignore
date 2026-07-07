@@ -1,0 +1,25 @@
+# Dependency directories
+**/node_modules/
+**/dist/
+**/build/
+
+# Local env files
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+
+# Backups and temporary files
+**/foodeo_*.json
+**/*.log
+
+# Editor directories and files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store

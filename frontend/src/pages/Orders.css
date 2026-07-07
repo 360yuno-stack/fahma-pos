@@ -1,0 +1,10 @@
+.orders-page { animation: fadeIn 0.3s ease; }
+.order-number { font-family: monospace; font-weight: 600; color: var(--color-primary); }
+.order-detail-header { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-lg); padding-bottom: var(--space-md); border-bottom: 1px solid var(--color-border); }
+.order-detail-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: 2px; }
+.order-detail-value { font-weight: 600; }
+.order-items-table { width: 100%; border-collapse: collapse; margin-bottom: var(--space-md); }
+.order-items-table th { padding: 8px 12px; text-align: left; font-size: var(--font-size-sm); color: var(--color-text-secondary); border-bottom: 2px solid var(--color-border); }
+.order-items-table td { padding: 8px 12px; border-bottom: 1px solid var(--color-border-light); }
+.order-total-row { display: flex; justify-content: flex-end; padding-top: var(--space-md); border-top: 2px solid var(--color-border); }
+.order-total-row .total-amount { font-size: var(--font-size-xl); font-weight: 700; color: var(--color-primary); }

@@ -1,0 +1,842 @@
+[
+  {
+    "code": "P0000058",
+    "name": "1/2 POLLO ASADO",
+    "category": "COMIDAS",
+    "price": 6.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000059",
+    "name": "1/2 POLLO ASADO + GUARNICION",
+    "category": "COMIDAS",
+    "price": 9.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000067",
+    "name": "1/2 RACION",
+    "category": "1/2 RACION",
+    "price": 6.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000034",
+    "name": "1/5 QUINTO DE AGUILA",
+    "category": "CERVEZAS",
+    "price": 1,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000113",
+    "name": "1/5radler",
+    "category": "CERVEZAS",
+    "price": 1.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000038",
+    "name": "1870",
+    "category": "CERVEZAS",
+    "price": 3,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000118",
+    "name": "Aceitunas",
+    "category": "EXTRAS",
+    "price": 1.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000074",
+    "name": "AGUA GAS LLEVAR",
+    "category": "REFRESCOS",
+    "price": 1.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000075",
+    "name": "AGUA GAS RESTAURANTE",
+    "category": "REFRESCOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000001",
+    "name": "AGUA LLEVAR",
+    "category": "REFRESCOS",
+    "price": 1.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000003",
+    "name": "AGUA RESTAURANTE",
+    "category": "REFRESCOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000049",
+    "name": "AGUILA BARRIL",
+    "category": "CERVEZAS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000037",
+    "name": "ALCAZAR",
+    "category": "CERVEZAS",
+    "price": 3,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000043",
+    "name": "AMSTEL TOSTADA 00",
+    "category": "CERVEZAS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000008",
+    "name": "AQUARIUS LIMON",
+    "category": "REFRESCOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000009",
+    "name": "AQUARIUS NARANJA",
+    "category": "REFRESCOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000116",
+    "name": "ARROZ",
+    "category": "EXTRAS",
+    "price": 2,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000015",
+    "name": "BATIDO CHOCO",
+    "category": "Sin Asignar",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000014",
+    "name": "BATIDO FRESA",
+    "category": "Sin Asignar",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000100",
+    "name": "BATIDO ULALA",
+    "category": "EXTRAS",
+    "price": 2.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000016",
+    "name": "BATIDO VAINILLA",
+    "category": "Sin Asignar",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000093",
+    "name": "BITTER KASS",
+    "category": "REFRESCOS",
+    "price": 2,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000090",
+    "name": "BLACK LABEL",
+    "category": "COPAS",
+    "price": 4.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000119",
+    "name": "Bolleria",
+    "category": "EXTRAS",
+    "price": 1.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000032",
+    "name": "BOTELLA DE VINO",
+    "category": "COPAS",
+    "price": 16.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000095",
+    "name": "BOTELLIN",
+    "category": "CERVEZAS",
+    "price": 1.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000024",
+    "name": "CAFE CON LECHE",
+    "category": "CAFES",
+    "price": 1.8,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000026",
+    "name": "CAFE DOBLE",
+    "category": "CAFES",
+    "price": 3,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000092",
+    "name": "CASERA",
+    "category": "REFRESCOS",
+    "price": 2,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000027",
+    "name": "CHOCOLATE",
+    "category": "CAFES",
+    "price": 2,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000101",
+    "name": "CHULETA DE TERNERA",
+    "category": "COMIDAS",
+    "price": 10.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000115",
+    "name": "CHUPITO",
+    "category": "COPAS",
+    "price": 1.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000111",
+    "name": "Churrasco",
+    "category": "COMIDAS",
+    "price": 10.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000114",
+    "name": "Churros",
+    "category": "DESAYUNOS",
+    "price": 3,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000004",
+    "name": "COCACOLA",
+    "category": "REFRESCOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000120",
+    "name": "Cocacola 1/2",
+    "category": "REFRESCOS",
+    "price": 3.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000006",
+    "name": "COCACOLA ZERO",
+    "category": "REFRESCOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000007",
+    "name": "COCACOLA ZEROZERO",
+    "category": "REFRESCOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000005",
+    "name": "COCALOLA LIGHT",
+    "category": "REFRESCOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000063",
+    "name": "CODILLO DE CERDO",
+    "category": "COMIDAS",
+    "price": 12.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000025",
+    "name": "COLACAO",
+    "category": "CAFES",
+    "price": 2,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000060",
+    "name": "COMIDA EMPLEADOS",
+    "category": "COMIDAS",
+    "price": 1,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000096",
+    "name": "COPA DE VINO",
+    "category": "COPAS",
+    "price": 3.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000031",
+    "name": "COPAS",
+    "category": "CERVEZAS",
+    "price": 3.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000030",
+    "name": "COPAS",
+    "category": "COPAS",
+    "price": 3.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000042",
+    "name": "CRUZ CAMPO SIN GLUTEN",
+    "category": "CERVEZAS",
+    "price": 3,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000041",
+    "name": "CUBO +racion",
+    "category": "CERVEZAS",
+    "price": 10,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000105",
+    "name": "D´HUEVO",
+    "category": "COMIDAS",
+    "price": 7.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000070",
+    "name": "DESAYUNO + TOPING",
+    "category": "DESAYUNOS",
+    "price": 3,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000069",
+    "name": "DESAYUNO MAS BOLLERIA",
+    "category": "DESAYUNOS",
+    "price": 2.2,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000035",
+    "name": "DESPERADOS",
+    "category": "CERVEZAS",
+    "price": 3,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000085",
+    "name": "donut",
+    "category": "EXTRAS",
+    "price": 2,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000088",
+    "name": "E. CAPRESSE",
+    "category": "COMIDAS",
+    "price": 8.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000089",
+    "name": "E. TROPICAL",
+    "category": "COMIDAS",
+    "price": 8.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000087",
+    "name": "ensalada cesar",
+    "category": "COMIDAS",
+    "price": 8.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000066",
+    "name": "entraña con patatas",
+    "category": "COMIDAS",
+    "price": 10.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000029",
+    "name": "ESPECIAL COFFEE",
+    "category": "CAFES",
+    "price": 3,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000010",
+    "name": "FANTA LIMON",
+    "category": "REFRESCOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000011",
+    "name": "FANTA NARANJA",
+    "category": "REFRESCOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000122",
+    "name": "Granizado",
+    "category": "EXTRAS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000080",
+    "name": "GUACAMOLE",
+    "category": "EXTRAS",
+    "price": 1,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000036",
+    "name": "GUINNES",
+    "category": "CERVEZAS",
+    "price": 3,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000102",
+    "name": "HAMBURGUESA DE ESPINACAS",
+    "category": "COMIDAS",
+    "price": 10.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000064",
+    "name": "HAMBURGUESA DE POLLO",
+    "category": "COMIDAS",
+    "price": 10.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000065",
+    "name": "HAMBURGUESA DE TERNERA",
+    "category": "COMIDAS",
+    "price": 10.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000071",
+    "name": "hamburguesa el aguila",
+    "category": "COMIDAS",
+    "price": 14.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000044",
+    "name": "HEINIKEN 00",
+    "category": "CERVEZAS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000021",
+    "name": "HORCHATA",
+    "category": "ZUMOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000081",
+    "name": "HUEVO",
+    "category": "EXTRAS",
+    "price": 1,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000028",
+    "name": "INFUSION",
+    "category": "INFUSIONES",
+    "price": 1.8,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000051",
+    "name": "JARRA DE CERVEZA",
+    "category": "CERVEZAS",
+    "price": 8.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000050",
+    "name": "JARRA TINTO DE VERANO",
+    "category": "CERVEZAS",
+    "price": 8.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000046",
+    "name": "LADRON DE MANZANAS",
+    "category": "CERVEZAS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000054",
+    "name": "LUBINA CON VERDURAS ASADAS",
+    "category": "COMIDAS",
+    "price": 12.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000125",
+    "name": "M&M",
+    "category": "EXTRAS",
+    "price": 2,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000117",
+    "name": "MANGONADA",
+    "category": "Sin Asignar",
+    "price": 8.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000079",
+    "name": "MAZORCA",
+    "category": "EXTRAS",
+    "price": 1,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000033",
+    "name": "Menu",
+    "category": "MENU",
+    "price": 12.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000121",
+    "name": "Menu hamburguesa 5,95€",
+    "category": "MENU",
+    "price": 5.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000112",
+    "name": "Menu semana",
+    "category": "MENU",
+    "price": 8.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000022",
+    "name": "MONSTER",
+    "category": "ENERGIZANTES",
+    "price": 2,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000098",
+    "name": "MOSTO",
+    "category": "ZUMOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000012",
+    "name": "NESTEA",
+    "category": "REFRESCOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000103",
+    "name": "NIDO DEL AGUILA",
+    "category": "COMIDAS",
+    "price": 7.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000077",
+    "name": "PAN",
+    "category": "EXTRAS",
+    "price": 0.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000104",
+    "name": "PANTRAMI",
+    "category": "COMIDAS",
+    "price": 7.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000061",
+    "name": "PARRILLADA FOUR YOU",
+    "category": "COMIDAS",
+    "price": 59.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000062",
+    "name": "PARRILLADA PARA DOS",
+    "category": "COMIDAS",
+    "price": 29.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000082",
+    "name": "PATATAS FRITAS",
+    "category": "EXTRAS",
+    "price": 4,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000097",
+    "name": "PIKAÑA",
+    "category": "COMIDAS",
+    "price": 10.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000124",
+    "name": "Pincho de tortilla",
+    "category": "COMIDAS",
+    "price": 3,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000057",
+    "name": "POLLO + GUARNICION",
+    "category": "COMIDAS",
+    "price": 16.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000056",
+    "name": "POLLO ASADO",
+    "category": "COMIDAS",
+    "price": 11.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000109",
+    "name": "POSTRE",
+    "category": "EXTRAS",
+    "price": 2.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000068",
+    "name": "RACIONES",
+    "category": "RACIONES",
+    "price": 10.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000023",
+    "name": "RED BULL",
+    "category": "ENERGIZANTES",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000106",
+    "name": "SAL. AGUILUCHO",
+    "category": "COMIDAS",
+    "price": 12.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000107",
+    "name": "SAL. CESAR AND CHIPS",
+    "category": "COMIDAS",
+    "price": 12.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000108",
+    "name": "SAL. FOGON DEL AGUILA",
+    "category": "COMIDAS",
+    "price": 14.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000055",
+    "name": "SALCHIPAPA EL AGUILA",
+    "category": "COMIDAS",
+    "price": 14.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000052",
+    "name": "SALMON A LA TOSCANA",
+    "category": "COMIDAS",
+    "price": 12.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000123",
+    "name": "Salmorejo",
+    "category": "EXTRAS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000078",
+    "name": "SALSA CHIMICHURRI",
+    "category": "EXTRAS",
+    "price": 0.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000086",
+    "name": "sandwich mixto",
+    "category": "EXTRAS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000073",
+    "name": "SECRETO",
+    "category": "COMIDAS",
+    "price": 10.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000053",
+    "name": "SEPIA Y ENSALADA",
+    "category": "COMIDAS",
+    "price": 12.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000039",
+    "name": "SIN FILTRAR",
+    "category": "CERVEZAS",
+    "price": 3,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000099",
+    "name": "SMOOTY",
+    "category": "EXTRAS",
+    "price": 2.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000013",
+    "name": "SPRITE",
+    "category": "REFRESCOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000110",
+    "name": "TARTA DE CHOCOLATE SIN GLUTEN",
+    "category": "EXTRAS",
+    "price": 2.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000048",
+    "name": "TERCIO AGUILA",
+    "category": "CERVEZAS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000045",
+    "name": "TERCIO DE HEINIKEN",
+    "category": "CERVEZAS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000072",
+    "name": "TERCIO radler",
+    "category": "CERVEZAS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000047",
+    "name": "TINTO DE VERANO",
+    "category": "CERVEZAS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000091",
+    "name": "TONICA",
+    "category": "REFRESCOS",
+    "price": 2,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000076",
+    "name": "ULALA",
+    "category": "EXTRAS",
+    "price": 2.95,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000018",
+    "name": "ZUMO MELOCOTON",
+    "category": "ZUMOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000019",
+    "name": "ZUMO NARANJA",
+    "category": "ZUMOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000020",
+    "name": "ZUMO NARANJA NATURAL",
+    "category": "ZUMOS",
+    "price": 2.5,
+    "hasModifiers": false
+  },
+  {
+    "code": "P0000017",
+    "name": "ZUMO PIÑA",
+    "category": "ZUMOS",
+    "price": 2.5,
+    "hasModifiers": false
+  }
+]

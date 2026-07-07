@@ -1,0 +1,23 @@
+FAHMA
+
+Debe proteger su clúster de MongoDB Atlas antes de poder usarlo. Configure qué usuarios y direcciones IP pueden acceder a su clúster .  Leer más 
+
+Agregar una dirección IP de conexión
+Se ha añadido su dirección IP actual ( 81.44.184.33 ) para habilitar la conectividad local. Solo las direcciones IP que añada a su lista de acceso podrán conectarse a los clústeres de su proyecto. Añada más direcciones más adelante en Acceso a la red . 
+Crear un usuario de base de datos
+Este primer usuario tendrá  atlasAdmin  permisos para este proyecto.
+
+Generamos automáticamente un nombre de usuario y una contraseña. Puedes usar estos o crear los tuyos propios.
+
+Necesitará las credenciales de usuario de su base de datos en el siguiente paso. Copie la contraseña del usuario de la base de datos.
+Nombre de usuario
+FAHMATPV
+Contraseña
+seDoEOSPPhDhHtoe
+Esconder
+
+npm run dev
+# En Terminal 2 (detén el servidor con Ctrl+C primero)
+cd C:\Users\bigcrt\Desktop\FAHMA-POS\backend
+
+npm run seed

@@ -1,0 +1,116 @@
+.clock-in-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.clock-in-modal {
+  background: var(--surface, #ffffff);
+  border-radius: var(--radius-lg, 12px);
+  width: 90%;
+  max-width: 360px;
+  padding: 24px;
+  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+  color: var(--text-primary, #1f2937);
+}
+
+.clock-in-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.clock-in-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.clock-in-header .close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-secondary, #6b7280);
+}
+
+.pin-display {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.pin-display span {
+  font-size: 2rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 2px solid var(--border-color, #e5e7eb);
+  color: var(--text-secondary, #6b7280);
+  transition: all 0.3s;
+}
+
+.pin-display span.filled {
+  color: var(--primary-color, #2563eb);
+  border-bottom-color: var(--primary-color, #2563eb);
+}
+
+.message {
+  text-align: center;
+  margin-bottom: 16px;
+  color: var(--primary-color, #2563eb);
+  font-weight: 500;
+}
+
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.numpad button {
+  background: var(--surface-hover, #f3f4f6);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: var(--radius-md, 8px);
+  height: 64px;
+  font-size: 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text-primary, #1f2937);
+  transition: background 0.2s;
+}
+
+.numpad button:hover:not(:disabled) {
+  background: var(--border-color, #e5e7eb);
+}
+
+.numpad button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.clear-btn {
+  color: #ef4444 !important;
+  font-weight: 600 !important;
+}
+
+.submit-btn {
+  background: var(--primary-color, #2563eb) !important;
+  color: white !important;
+  border: none !important;
+}
+.submit-btn:hover:not(:disabled) {
+  background: var(--primary-hover, #1d4ed8) !important;
+}

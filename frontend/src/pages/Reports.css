@@ -1,0 +1,38 @@
+.reports-page { animation: fadeIn 0.3s ease; }
+.stat-card { background: var(--color-bg-white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); padding: var(--space-lg); display: flex; align-items: center; gap: var(--space-md); transition: box-shadow var(--transition-fast); }
+.stat-card:hover { box-shadow: var(--shadow-md); }
+.stat-icon { width: 52px; height: 52px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.stat-info { flex: 1; }
+.stat-value { font-size: var(--font-size-2xl); font-weight: 700; }
+.stat-label { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+.top-products-list { list-style: none; }
+.top-product-item { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-sm) 0; border-bottom: 1px solid var(--color-border-light); }
+.top-product-item:last-child { border-bottom: none; }
+.top-product-rank { width: 28px; height: 28px; border-radius: 50%; background: var(--color-primary-bg); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: var(--font-size-sm); flex-shrink: 0; }
+.top-product-name { flex: 1; font-weight: 500; }
+.top-product-qty { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+.top-product-revenue { font-weight: 600; color: var(--color-success); }
+.placeholder-message { text-align: center; padding: var(--space-xl); color: var(--color-text-secondary); font-size: var(--font-size-base); }
+
+@media print {
+  .no-print, .filter-bar, .sidebar, .sidebar-toggle, .no-print * {
+    display: none !important;
+  }
+  body, html {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .main-content {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+  .reports-page {
+    padding: 0 !important;
+  }
+  .card, .stat-card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    break-inside: avoid;
+  }
+}
+
