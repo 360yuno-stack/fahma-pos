@@ -121,7 +121,16 @@ exports.create = async (req, res) => {
 
     const populated = await Order.findById(order._id)
       .populate('table', 'name number zone')
-      .populate('server', 'username firstName lastName');
+      .populate('server', 'username firstName lastName')
+      .populate('items.product', 'category name price');
+
+    // Imprimir comandas automáticamente (BARRA / COCINA)
+    try {
+      const { printOrderComanda } = require('../utils/printHelper');
+      printOrderComanda(populated);
+    } catch (printErr) {
+      console.error('Error al lanzar impresión automática:', printErr);
+    }
 
     // Emit socket event if io is available
     const io = req.app.get('io');
