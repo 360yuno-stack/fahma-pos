@@ -55,6 +55,19 @@ export default function Printers() {
     }
   };
 
+  const handleTestPrinter = async () => {
+    if (!editingId) {
+      alert('Por favor, selecciona una impresora guardada o guárdala antes de probarla.');
+      return;
+    }
+    try {
+      const res = await api.post(`/printers/${editingId}/test`);
+      alert(res.data.message || 'Prueba de impresión enviada con éxito');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al conectar con la impresora');
+    }
+  };
+
   const openEdit = (printer) => {
     setFormData({ 
       name: printer.name, 
@@ -350,7 +363,7 @@ export default function Printers() {
                 </div>
                 <div className="modal-footer">
                   <div style={{ flexGrow: 1 }}>
-                    <button type="button" className="btn btn-secondary" onClick={() => alert('Prueba de impresión enviada')}>
+                    <button type="button" className="btn btn-secondary" onClick={handleTestPrinter}>
                       Probar Impresora
                     </button>
                   </div>

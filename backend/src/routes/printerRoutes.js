@@ -44,4 +44,74 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+const net = require('net');
+
+// POST /api/printers/:id/test
+router.post('/:id/test', async (req, res) => {
+  try {
+    const printer = await Printer.findById(req.params.id);
+    if (!printer) return res.status(404).json({ success: false, message: 'Printer not found' });
+
+    if (printer.connectionType === 'system') {
+      return res.status(400).json({ success: false, message: 'La impresión directa por USB requiere el servidor local en Windows.' });
+    }
+
+    const ipAddress = printer.ipAddress;
+    const port = printer.port || 9100;
+    
+    console.log(`Enviando ticket de prueba a ${printer.name} (${ipAddress}:${port})...`);
+
+    const client = new net.Socket();
+    client.setTimeout(3000);
+
+    client.connect(port, ipAddress, () => {
+      const ESC = '\x1b';
+      const GS = '\x1d';
+      
+      let data = '';
+      data += ESC + '@'; // Initialize
+      data += ESC + 'a' + '\x01'; // Center
+      data += ESC + 'E' + '\x01'; // Bold ON
+      data += 'EL FOGON DEL AGUILA\n';
+      data += ESC + 'E' + '\x00'; // Bold OFF
+      data += 'FAHMA POS\n';
+      data += '-------------------------------\n\n';
+      data += ESC + 'a' + '\x00'; // Left
+      data += `Impresora: ${printer.name}\n`;
+      data += `Tipo: ${printer.type}\n`;
+      data += `Conexion: TCP/IP (${ipAddress}:${port})\n`;
+      data += `Fecha: ${new Date().toLocaleString()}\n\n`;
+      data += ESC + 'a' + '\x01'; // Center
+      data += 'CONEXION EXITOSA!\n';
+      data += '-------------------------------\n';
+      data += '\n\n\n\n';
+      data += GS + 'V' + '\x41' + '\x03'; // Cut
+
+      client.write(data, 'latin1', () => {
+        client.end();
+        res.json({ success: true, message: `Prueba enviada con éxito a ${printer.name}` });
+      });
+    });
+
+    client.on('error', (err) => {
+      console.error(`Error de impresión en ${printer.name}:`, err.message);
+      res.status(500).json({ 
+        success: false, 
+        message: `Error al conectar a ${printer.name} (${ipAddress}:${port}): ${err.message}` 
+      });
+    });
+
+    client.on('timeout', () => {
+      client.destroy();
+      res.status(504).json({ 
+        success: false, 
+        message: `Tiempo de espera agotado al conectar a ${printer.name} (${ipAddress}:${port}).` 
+      });
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 module.exports = router;
