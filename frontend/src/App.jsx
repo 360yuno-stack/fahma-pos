@@ -1,3 +1,4 @@
+// Deploy Trigger: Public repo config active
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import AppLayout from './components/Layout/AppLayout';
