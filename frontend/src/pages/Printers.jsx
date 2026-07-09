@@ -178,13 +178,13 @@ export default function Printers() {
 
         {isModalOpen && (
           <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-            <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-container" style={{ maxHeight: '90vh', display: 'flex', flexDirection: 'column' }} onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <h2>{editingId ? 'Editar Impresora' : 'Nueva Impresora'}</h2>
                 <button className="modal-close-btn mdi mdi-close" onClick={() => setIsModalOpen(false)} />
               </div>
-              <form onSubmit={handleSubmit}>
-                <div className="modal-body">
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+                <div className="modal-body" style={{ overflowY: 'auto', flex: 1, paddingRight: '10px' }}>
                   <div className="form-row">
                     <div className="form-group">
                       <label className="form-label">Nombre</label>
