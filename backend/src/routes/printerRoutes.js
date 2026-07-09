@@ -44,7 +44,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-const net = require('net');
+const fs = require('fs');
 
 // POST /api/printers/:id/test
 router.post('/:id/test', async (req, res) => {
@@ -52,62 +52,78 @@ router.post('/:id/test', async (req, res) => {
     const printer = await Printer.findById(req.params.id);
     if (!printer) return res.status(404).json({ success: false, message: 'Printer not found' });
 
-    if (printer.connectionType === 'system') {
-      return res.status(400).json({ success: false, message: 'La impresión directa por USB requiere el servidor local en Windows.' });
-    }
-
-    const ipAddress = printer.ipAddress;
-    const port = printer.port || 9100;
+    const ESC = '\x1b';
+    const GS = '\x1d';
     
-    console.log(`Enviando ticket de prueba a ${printer.name} (${ipAddress}:${port})...`);
+    let data = '';
+    data += ESC + '@'; // Initialize
+    data += ESC + 'a' + '\x01'; // Center
+    data += ESC + 'E' + '\x01'; // Bold ON
+    data += 'EL FOGON DEL AGUILA\n';
+    data += ESC + 'E' + '\x00'; // Bold OFF
+    data += 'FAHMA POS\n';
+    data += '-------------------------------\n\n';
+    data += ESC + 'a' + '\x00'; // Left
+    data += `Impresora: ${printer.name}\n`;
+    data += `Tipo: ${printer.type}\n`;
+    
+    if (printer.connectionType === 'system') {
+      data += `Conexion: USB Local Shared (\\\\localhost\\${printer.name})\n`;
+    } else {
+      data += `Conexion: TCP/IP (${printer.ipAddress}:${printer.port || 9100})\n`;
+    }
+    
+    data += `Fecha: ${new Date().toLocaleString()}\n\n`;
+    data += ESC + 'a' + '\x01'; // Center
+    data += 'CONEXION EXITOSA!\n';
+    data += '-------------------------------\n';
+    data += '\n\n\n\n';
+    data += GS + 'V' + '\x41' + '\x03'; // Cut
 
-    const client = new net.Socket();
-    client.setTimeout(3000);
+    if (printer.connectionType === 'system') {
+      const sharePath = `\\\\localhost\\${printer.name}`;
+      console.log(`Prueba USB: Escribiendo en ${sharePath}...`);
+      try {
+        fs.writeFileSync(sharePath, data, 'latin1');
+        res.json({ success: true, message: `Prueba enviada con éxito por USB a ${printer.name} (${sharePath})` });
+      } catch (err) {
+        console.error(`Error en prueba de impresión USB en ${printer.name}:`, err.message);
+        res.status(500).json({ 
+          success: false, 
+          message: `Error al imprimir por USB en la impresora de Windows compartida como '${printer.name}' (${sharePath}). Asegúrate de compartirla en las propiedades de Windows. Detalle: ${err.message}` 
+        });
+      }
+    } else {
+      const ipAddress = printer.ipAddress;
+      const port = printer.port || 9100;
+      console.log(`Enviando ticket de prueba de red a ${printer.name} (${ipAddress}:${port})...`);
 
-    client.connect(port, ipAddress, () => {
-      const ESC = '\x1b';
-      const GS = '\x1d';
-      
-      let data = '';
-      data += ESC + '@'; // Initialize
-      data += ESC + 'a' + '\x01'; // Center
-      data += ESC + 'E' + '\x01'; // Bold ON
-      data += 'EL FOGON DEL AGUILA\n';
-      data += ESC + 'E' + '\x00'; // Bold OFF
-      data += 'FAHMA POS\n';
-      data += '-------------------------------\n\n';
-      data += ESC + 'a' + '\x00'; // Left
-      data += `Impresora: ${printer.name}\n`;
-      data += `Tipo: ${printer.type}\n`;
-      data += `Conexion: TCP/IP (${ipAddress}:${port})\n`;
-      data += `Fecha: ${new Date().toLocaleString()}\n\n`;
-      data += ESC + 'a' + '\x01'; // Center
-      data += 'CONEXION EXITOSA!\n';
-      data += '-------------------------------\n';
-      data += '\n\n\n\n';
-      data += GS + 'V' + '\x41' + '\x03'; // Cut
+      const client = new net.Socket();
+      client.setTimeout(3000);
 
-      client.write(data, 'latin1', () => {
-        client.end();
-        res.json({ success: true, message: `Prueba enviada con éxito a ${printer.name}` });
+      client.connect(port, ipAddress, () => {
+        client.write(data, 'latin1', () => {
+          client.end();
+          res.json({ success: true, message: `Prueba enviada con éxito a ${printer.name} (${ipAddress}:${port})` });
+        });
       });
-    });
 
-    client.on('error', (err) => {
-      console.error(`Error de impresión en ${printer.name}:`, err.message);
-      res.status(500).json({ 
-        success: false, 
-        message: `Error al conectar a ${printer.name} (${ipAddress}:${port}): ${err.message}` 
+      client.on('error', (err) => {
+        console.error(`Error de impresión en ${printer.name}:`, err.message);
+        res.status(500).json({ 
+          success: false, 
+          message: `Error al conectar a ${printer.name} (${ipAddress}:${port}): ${err.message}` 
+        });
       });
-    });
 
-    client.on('timeout', () => {
-      client.destroy();
-      res.status(504).json({ 
-        success: false, 
-        message: `Tiempo de espera agotado al conectar a ${printer.name} (${ipAddress}:${port}).` 
+      client.on('timeout', () => {
+        client.destroy();
+        res.status(504).json({ 
+          success: false, 
+          message: `Tiempo de espera agotado al conectar a ${printer.name} (${ipAddress}:${port}).` 
+        });
       });
-    });
+    }
 
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
