@@ -67,7 +67,8 @@ const orderSchema = new mongoose.Schema({
 // Auto-generate orderNumber before save
 orderSchema.pre('save', async function(next) {
   if (!this.orderNumber) {
-    const lastOrder = await this.constructor.findOne({}, {}, { sort: { orderNumber: -1 } });
+    // Filtrar identificadores grandes importados de Foodeo para evitar pérdida de precisión y duplicados
+    const lastOrder = await this.constructor.findOne({ orderNumber: { $lt: 1000000 } }, {}, { sort: { orderNumber: -1 } });
     this.orderNumber = lastOrder ? lastOrder.orderNumber + 1 : 1;
   }
   next();
