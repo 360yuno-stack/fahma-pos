@@ -71,52 +71,68 @@ exports.getById = async (req, res) => {
 // POST /api/orders - Create order (auto-calc totals)
 exports.create = async (req, res) => {
   try {
-    const { items, table, type, paymentMethod, server, customer, notes, discount = 0 } = req.body;
+    const rawItems = req.body.items || req.body.lines || [];
+    const tableId = req.body.table || req.body.tableId || null;
+    const paymentMethod = req.body.paymentMethod || '';
+    const status = req.body.status || 'pending';
+    const discount = req.body.discount || 0;
 
-    if (!items || items.length === 0) {
+    if (rawItems.length === 0) {
       return res.status(400).json({ success: false, message: 'Order must have at least one item' });
     }
 
-    // Calculate subtotals for each item
-    const processedItems = items.map(item => ({
-      product: item.product,
-      name: item.name,
-      quantity: item.quantity,
-      price: item.price,
-      subtotal: item.quantity * item.price,
-      modifiers: item.modifiers || [],
-      notes: item.notes || ''
-    }));
+    // Mapear campos de items tolerando tanto 'lines' como 'items'
+    const processedItems = rawItems.map(item => {
+      const prodId = item.product || item.productId;
+      const qty = item.quantity || item.qty || 1;
+      const price = item.price || 0;
+      return {
+        product: prodId,
+        name: item.name || '',
+        quantity: qty,
+        price: price,
+        subtotal: qty * price,
+        modifiers: item.modifiers || [],
+        notes: item.notes || ''
+      };
+    });
 
-    // Calculate totals
+    // Calcular totales
     const subtotal = processedItems.reduce((sum, item) => sum + item.subtotal, 0);
-    const taxRate = 10; // Default 10%
-    const taxes = Math.round((subtotal * taxRate / 100) * 100) / 100;
-    const total = Math.round((subtotal + taxes - discount) * 100) / 100;
+    const taxRate = 10; // 10% IVA
+    const taxes = req.body.tax || Math.round((subtotal * taxRate / 100) * 100) / 100;
+    const total = req.body.total || Math.round((subtotal + taxes - discount) * 100) / 100;
 
     const order = new Order({
       items: processedItems,
-      table: table || null,
-      type: type || 'dine-in',
-      status: 'pending',
+      table: tableId,
+      type: req.body.type || 'dine-in',
+      status: status,
       subtotal,
       taxes,
       discount,
       total,
-      paymentMethod: paymentMethod || '',
-      server: server || null,
-      customer: customer || {},
-      notes: notes || ''
+      paymentMethod: paymentMethod,
+      server: req.body.server || null,
+      customer: req.body.customer || {},
+      notes: req.body.notes || ''
     });
 
     await order.save();
 
-    // If dine-in with table, mark table as occupied
-    if (table) {
-      await Table.findByIdAndUpdate(table, {
-        status: 'occupied',
-        currentOrder: order._id
-      });
+    // Actualizar estado de la mesa (Libre si se cobra directo, Ocupada si queda pendiente)
+    if (tableId) {
+      if (status === 'completed' || status === 'paid') {
+        await Table.findByIdAndUpdate(tableId, {
+          status: 'free',
+          currentOrder: null
+        });
+      } else {
+        await Table.findByIdAndUpdate(tableId, {
+          status: 'occupied',
+          currentOrder: order._id
+        });
+      }
     }
 
     const populated = await Order.findById(order._id)
