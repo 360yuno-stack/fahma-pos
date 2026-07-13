@@ -81,89 +81,96 @@ export default function Orders() {
     return `€${(amount || 0).toFixed(2)}`;
   };
 
-  const handlePrintTicket = (order) => {
-    const printWindow = window.open('', '_blank', 'width=600,height=800');
-    const orderNum = order.orderNumber || order._id.slice(-6).toUpperCase();
-    const itemsHtml = (order.items || []).map(item => `
-      <tr>
-        <td style="padding: 5px 0;">${item.name || item.product?.name || 'Producto'}</td>
-        <td style="padding: 5px 0; text-align: center;">${item.quantity}</td>
-        <td style="padding: 5px 0; text-align: right;">€${item.price.toFixed(2)}</td>
-        <td style="padding: 5px 0; text-align: right;">€${(item.quantity * item.price).toFixed(2)}</td>
-      </tr>
-    `).join('');
+  const handlePrintTicket = async (order) => {
+    try {
+      // Intentar impresión directa vía hardware local desde el backend
+      await api.post(`/orders/${order._id}/print`, { type: 'receipt' });
+    } catch (err) {
+      console.warn('Fallo de impresión directa, recurriendo a impresión de navegador:', err);
+      
+      const printWindow = window.open('', '_blank', 'width=600,height=800');
+      const orderNum = order.orderNumber || order._id.slice(-6).toUpperCase();
+      const itemsHtml = (order.items || []).map(item => `
+        <tr>
+          <td style="padding: 5px 0;">${item.name || item.product?.name || 'Producto'}</td>
+          <td style="padding: 5px 0; text-align: center;">${item.quantity}</td>
+          <td style="padding: 5px 0; text-align: right;">€${item.price.toFixed(2)}</td>
+          <td style="padding: 5px 0; text-align: right;">€${(item.quantity * item.price).toFixed(2)}</td>
+        </tr>
+      `).join('');
 
-    const notesHtml = order.notes ? `
-      <div style="border-top: 1px dashed #000; padding: 10px 0; font-size: 14px; margin-top: 10px;">
-        <strong>ANOTACIÓN:</strong> ${order.notes}
-      </div>
-    ` : '';
+      const notesHtml = order.notes ? `
+        <div style="border-top: 1px dashed #000; padding: 10px 0; font-size: 14px; margin-top: 10px;">
+          <strong>ANOTACIÓN:</strong> ${order.notes}
+        </div>
+      ` : '';
 
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Ticket #${orderNum}</title>
-          <style>
-            body { font-family: 'Courier New', Courier, monospace; width: 280px; margin: 0 auto; padding: 10px; font-size: 12px; }
-            h2 { text-align: center; margin: 5px 0; }
-            .center { text-align: center; }
-            .right { text-align: right; }
-            table { width: 100%; border-collapse: collapse; }
-            .border-top { border-top: 1px dashed #000; }
-            .border-bottom { border-bottom: 1px dashed #000; }
-          </style>
-        </head>
-        <body>
-          <h2 style="font-size: 16px; text-transform: uppercase; margin-bottom: 2px;">${settings?.restaurantName || 'EL FOGÓN DEL ÁGUILA'}</h2>
-          ${settings?.nif ? `<div class="center">NIF: ${settings.nif}</div>` : ''}
-          ${settings?.address ? `<div class="center" style="font-size: 11px;">${settings.address}</div>` : ''}
-          ${settings?.phone ? `<div class="center">Tel: ${settings.phone}</div>` : ''}
-          <div class="center" style="margin-top: 5px; font-weight: bold;">Ticket #${orderNum}</div>
-          <div class="center">Fecha: ${new Date(order.createdAt).toLocaleString('es-ES')}</div>
-          <div class="center">Mesa: ${order.table?.number ? `Mesa ${order.table.number}` : (order.tableName || 'Sin mesa')}</div>
-          <br/>
-          <table>
-            <thead>
-              <tr class="border-bottom">
-                <th style="text-align: left;">Item</th>
-                <th>Cant</th>
-                <th style="text-align: right;">P.Ud</th>
-                <th style="text-align: right;">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${itemsHtml}
-            </tbody>
-          </table>
-          <br/>
-          <div class="border-top" style="padding: 5px 0;">
-            <table style="font-weight: bold; width: 100%;">
-              <tr>
-                <td>Subtotal (S/I):</td>
-                <td class="right">€${(order.subtotal || (order.total / 1.10)).toFixed(2)}</td>
-              </tr>
-              <tr>
-                <td>IVA (10% Inc):</td>
-                <td class="right">€${(order.taxes || (order.total - (order.total / 1.10))).toFixed(2)}</td>
-              </tr>
-              <tr style="font-size: 14px;">
-                <td>TOTAL:</td>
-                <td class="right">€${order.total.toFixed(2)}</td>
-              </tr>
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Ticket #${orderNum}</title>
+            <style>
+              body { font-family: 'Courier New', Courier, monospace; width: 280px; margin: 0 auto; padding: 10px; font-size: 12px; }
+              h2 { text-align: center; margin: 5px 0; }
+              .center { text-align: center; }
+              .right { text-align: right; }
+              table { width: 100%; border-collapse: collapse; }
+              .border-top { border-top: 1px dashed #000; }
+              .border-bottom { border-bottom: 1px dashed #000; }
+            </style>
+          </head>
+          <body>
+            <h2 style="font-size: 16px; text-transform: uppercase; margin-bottom: 2px;">${settings?.restaurantName || 'EL FOGÓN DEL ÁGUILA'}</h2>
+            ${settings?.nif ? `<div class="center">NIF: ${settings.nif}</div>` : ''}
+            ${settings?.address ? `<div class="center" style="font-size: 11px;">${settings.address}</div>` : ''}
+            ${settings?.phone ? `<div class="center">Tel: ${settings.phone}</div>` : ''}
+            <div class="center" style="margin-top: 5px; font-weight: bold;">Ticket #${orderNum}</div>
+            <div class="center">Fecha: ${new Date(order.createdAt).toLocaleString('es-ES')}</div>
+            <div class="center">Mesa: ${order.table?.number ? `Mesa ${order.table.number}` : (order.tableName || 'Sin mesa')}</div>
+            <br/>
+            <table>
+              <thead>
+                <tr class="border-bottom">
+                  <th style="text-align: left;">Item</th>
+                  <th>Cant</th>
+                  <th style="text-align: right;">P.Ud</th>
+                  <th style="text-align: right;">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
             </table>
-          </div>
-          ${notesHtml}
-          <br/>
-          <div class="center" style="font-size: 11px; font-weight: bold; white-space: pre-wrap;">${settings?.ticketFooterText || '¡Gracias por su visita!'}</div>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 250);
+            <br/>
+            <div class="border-top" style="padding: 5px 0;">
+              <table style="font-weight: bold; width: 100%;">
+                <tr>
+                  <td>Subtotal (S/I):</td>
+                  <td class="right">€${(order.subtotal || (order.total / 1.10)).toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td>IVA (10% Inc):</td>
+                  <td class="right">€${(order.taxes || (order.total - (order.total / 1.10))).toFixed(2)}</td>
+                </tr>
+                <tr style="font-size: 14px;">
+                  <td>TOTAL:</td>
+                  <td class="right">€${order.total.toFixed(2)}</td>
+                </tr>
+              </table>
+            </div>
+            ${notesHtml}
+            <br/>
+            <div class="center" style="font-size: 11px; font-weight: bold; white-space: pre-wrap;">${settings?.ticketFooterText || '¡Gracias por su visita!'}</div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 250);
+    }
   };
 
   if (loading) {

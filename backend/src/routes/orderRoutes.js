@@ -133,7 +133,21 @@ router.post('/', async (req, res) => {
       }
     }
 
-    const populated = await Order.findById(saved._id).populate('table', 'name number zone');
+    const populated = await Order.findById(saved._id)
+      .populate('table', 'name number zone')
+      .populate('items.product', 'category name price');
+
+    // Imprimir comanda y/o recibo automáticamente
+    try {
+      const { printOrderComanda, printOrderReceipt } = require('../utils/printHelper');
+      printOrderComanda(populated);
+      if (saved.status === 'completed') {
+        printOrderReceipt(populated);
+      }
+    } catch (printErr) {
+      console.error('Error en impresión automática en creación de pedido:', printErr);
+    }
+
     res.status(201).json({ success: true, data: populated });
   } catch (err) {
     console.error('Error POST /api/orders:', err);
@@ -177,7 +191,45 @@ router.patch('/:id/status', async (req, res) => {
     }
     
     await order.save();
+    
+    // Si se ha cobrado, imprimir ticket de venta automáticamente
+    if (order.status === 'completed') {
+      try {
+        const populated = await Order.findById(order._id)
+          .populate('table', 'name number zone')
+          .populate('items.product', 'category name price');
+        const { printOrderReceipt } = require('../utils/printHelper');
+        printOrderReceipt(populated);
+      } catch (printErr) {
+        console.error('Error al imprimir recibo en cambio de estado:', printErr);
+      }
+    }
+
     res.json({ success: true, data: order });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// POST /api/orders/:id/print - Re-imprimir ticket (comanda o recibo)
+router.post('/:id/print', async (req, res) => {
+  try {
+    const { type = 'receipt' } = req.body; // 'comanda' o 'receipt'
+    const order = await Order.findById(req.params.id)
+      .populate('table', 'name number zone')
+      .populate('items.product', 'category name price');
+      
+    if (!order) return res.status(404).json({ success: false, message: 'Pedido no encontrado' });
+
+    const { printOrderComanda, printOrderReceipt } = require('../utils/printHelper');
+    
+    if (type === 'comanda') {
+      await printOrderComanda(order);
+      res.json({ success: true, message: 'Comanda enviada a las impresoras' });
+    } else {
+      await printOrderReceipt(order);
+      res.json({ success: true, message: 'Ticket de venta enviado a las impresoras' });
+    }
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
