@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { categoriesAPI, productsAPI, ordersAPI, tablesAPI } from '../services/api';
+import api, { categoriesAPI, productsAPI, ordersAPI, tablesAPI } from '../services/api';
 import './TPV.css';
 
 const IVA_RATE = 0.10;
@@ -53,6 +53,13 @@ export default function TPV() {
   const [quickEditName, setQuickEditName] = useState('');
   const [quickEditPrice, setQuickEditPrice] = useState('');
 
+  // Modifiers
+  const [modifiers, setModifiers] = useState([]);
+  const [isModifiersModalOpen, setIsModifiersModalOpen] = useState(false);
+  const [modifiersProduct, setModifiersProduct] = useState(null);
+  const [applicableModifiers, setApplicableModifiers] = useState([]);
+  const [selectedModifierOptions, setSelectedModifierOptions] = useState({});
+
   const openQuickEdit = (product) => {
     setQuickEditProduct(product);
     setQuickEditName(product.name || product.nombre || '');
@@ -79,6 +86,7 @@ export default function TPV() {
   useEffect(() => {
     fetchCategories();
     fetchTables();
+    fetchModifiers();
   }, []);
 
   // Load products when category changes
@@ -131,6 +139,16 @@ export default function TPV() {
     }
   }
 
+  async function fetchModifiers() {
+    try {
+      const res = await api.get('/modifiers');
+      const list = res.data?.data || [];
+      setModifiers(list);
+    } catch (err) {
+      console.error('Error fetching modifiers:', err);
+    }
+  }
+
   // Filter products by search
   const filteredProducts = products.filter(p => {
     if (p.isAvailable === false) return false;
@@ -145,18 +163,32 @@ export default function TPV() {
     const productName = product.name || product.nombre || 'Producto';
     const productPrice = product.price ?? product.precio ?? 0;
 
+    const prodModifiers = modifiers.filter(m => m.products && m.products.includes(productId));
+    if (prodModifiers.length > 0) {
+      setModifiersProduct(product);
+      setApplicableModifiers(prodModifiers);
+      const initialSelections = {};
+      prodModifiers.forEach(m => {
+        initialSelections[m._id] = m.isRequired && m.options.length > 0 ? [m.options[0].name] : [];
+      });
+      setSelectedModifierOptions(initialSelections);
+      setIsModifiersModalOpen(true);
+      return;
+    }
+
     setTicketLines(prev => {
-      const existing = prev.find(l => l.productId === productId);
+      const existing = prev.find(l => l.productId === productId && (!l.modifiers || l.modifiers.length === 0));
       if (existing) {
         return prev.map(l =>
-          l.productId === productId ? { ...l, qty: l.qty + 1 } : l
+          (l.productId === productId && (!l.modifiers || l.modifiers.length === 0)) ? { ...l, qty: l.qty + 1 } : l
         );
       }
       return [...prev, {
         productId,
         name: productName,
         price: productPrice,
-        qty: 1
+        qty: 1,
+        modifiers: []
       }];
     });
 
@@ -165,16 +197,67 @@ export default function TPV() {
     setTimeout(() => setAddedProductId(null), 300);
   }
 
-  function updateQty(productId, delta) {
+  function addProductWithModifiers() {
+    if (!modifiersProduct) return;
+    
+    const productId = modifiersProduct._id || modifiersProduct.id;
+    const productName = modifiersProduct.name || modifiersProduct.nombre || 'Producto';
+    const productPrice = modifiersProduct.price ?? modifiersProduct.precio ?? 0;
+    
+    let extraPrice = 0;
+    const modifierNames = [];
+    
+    applicableModifiers.forEach(m => {
+      const selectedOptionNames = selectedModifierOptions[m._id] || [];
+      selectedOptionNames.forEach(optName => {
+        const option = m.options.find(o => o.name === optName);
+        if (option) {
+          extraPrice += option.price || 0;
+          modifierNames.push(optName);
+        }
+      });
+    });
+
+    const finalPrice = productPrice + extraPrice;
+
+    setTicketLines(prev => {
+      const existingIndex = prev.findIndex(l => 
+        l.productId === productId && 
+        JSON.stringify(l.modifiers || []) === JSON.stringify(modifierNames)
+      );
+      
+      if (existingIndex > -1) {
+        return prev.map((l, idx) =>
+          idx === existingIndex ? { ...l, qty: l.qty + 1 } : l
+        );
+      }
+      
+      return [...prev, {
+        productId,
+        name: productName,
+        price: finalPrice,
+        qty: 1,
+        modifiers: modifierNames
+      }];
+    });
+
+    setIsModifiersModalOpen(false);
+    setModifiersProduct(null);
+    
+    setAddedProductId(productId);
+    setTimeout(() => setAddedProductId(null), 300);
+  }
+
+  function updateQty(index, delta) {
     setTicketLines(prev =>
       prev
-        .map(l => l.productId === productId ? { ...l, qty: l.qty + delta } : l)
+        .map((l, idx) => idx === index ? { ...l, qty: l.qty + delta } : l)
         .filter(l => l.qty > 0)
     );
   }
 
-  function removeLine(productId) {
-    setTicketLines(prev => prev.filter(l => l.productId !== productId));
+  function removeLine(index) {
+    setTicketLines(prev => prev.filter((_, idx) => idx !== index));
   }
 
   function clearTicket() {
@@ -546,10 +629,17 @@ export default function TPV() {
               <p>Añade productos al ticket</p>
             </div>
           ) : (
-            ticketLines.map(line => (
-              <div key={line.productId} className="tpv-ticket-line">
+            ticketLines.map((line, index) => (
+              <div key={index} className="tpv-ticket-line">
                 <div className="tpv-ticket-line-info">
-                  <div className="tpv-ticket-line-name">{line.name}</div>
+                  <div className="tpv-ticket-line-name">
+                    {line.name}
+                    {line.modifiers && line.modifiers.length > 0 && (
+                      <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>
+                        * {line.modifiers.join(', ')}
+                      </div>
+                    )}
+                  </div>
                   <div className="tpv-ticket-line-price">
                     {formatCurrency(line.price)} /ud
                   </div>
@@ -558,14 +648,14 @@ export default function TPV() {
                 <div className="tpv-ticket-line-qty">
                   <button
                     className="tpv-qty-btn"
-                    onClick={() => updateQty(line.productId, -1)}
+                    onClick={() => updateQty(index, -1)}
                   >
                     <span className="mdi mdi-minus" />
                   </button>
                   <span className="tpv-qty-value">{line.qty}</span>
                   <button
                     className="tpv-qty-btn"
-                    onClick={() => updateQty(line.productId, 1)}
+                    onClick={() => updateQty(index, 1)}
                   >
                     <span className="mdi mdi-plus" />
                   </button>
@@ -577,7 +667,7 @@ export default function TPV() {
 
                 <button
                   className="tpv-ticket-line-delete"
-                  onClick={() => removeLine(line.productId)}
+                  onClick={() => removeLine(index)}
                 >
                   <span className="mdi mdi-delete-outline" />
                 </button>
@@ -698,6 +788,68 @@ export default function TPV() {
               </button>
               <button className="btn btn-primary" onClick={handleSaveQuickEdit}>
                 Guardar Cambios
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Modifiers Modal */}
+      {isModifiersModalOpen && modifiersProduct && (
+        <div className="modal-overlay" style={{ zIndex: 1001 }}>
+          <div className="modal-container" style={{ maxWidth: '450px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Personalizar {modifiersProduct.name || modifiersProduct.nombre}</h2>
+              <button className="modal-close-btn mdi mdi-close" onClick={() => setIsModifiersModalOpen(false)} />
+            </div>
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto', flex: 1, padding: '16px' }}>
+              {applicableModifiers.map(m => (
+                <div key={m._id} className="modifier-group" style={{ borderBottom: '1px solid #f3f4f6', paddingBottom: '12px' }}>
+                  <h3 style={{ fontSize: '15px', fontWeight: '600', marginBottom: '8px', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>{m.name}</span>
+                    {m.isRequired && <span style={{ fontSize: '11px', color: '#ef4444', background: '#fee2e2', padding: '2px 6px', borderRadius: '4px' }}>Obligatorio</span>}
+                  </h3>
+                  <div className="modifier-options" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {m.options.map(opt => {
+                      const isChecked = (selectedModifierOptions[m._id] || []).includes(opt.name);
+                      return (
+                        <label key={opt.name} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
+                          <input
+                            type={m.multiple ? "checkbox" : "radio"}
+                            name={`modifier-${m._id}`}
+                            checked={isChecked}
+                            onChange={() => {
+                              setSelectedModifierOptions(prev => {
+                                const current = prev[m._id] || [];
+                                if (m.multiple) {
+                                  const next = current.includes(opt.name)
+                                    ? current.filter(x => x !== opt.name)
+                                    : [...current, opt.name];
+                                  return { ...prev, [m._id]: next };
+                                } else {
+                                  return { ...prev, [m._id]: [opt.name] };
+                                }
+                              });
+                            }}
+                          />
+                          <span>{opt.name}</span>
+                          {opt.price > 0 && <span style={{ color: '#10b981', fontWeight: '500', marginLeft: 'auto' }}>+{formatCurrency(opt.price)}</span>}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', padding: '16px' }}>
+              <button className="btn btn-secondary" onClick={() => setIsModifiersModalOpen(false)}>
+                Cancelar
+              </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={addProductWithModifiers}
+                disabled={applicableModifiers.some(m => m.isRequired && (!selectedModifierOptions[m._id] || selectedModifierOptions[m._id].length === 0))}
+              >
+                Aceptar
               </button>
             </div>
           </div>

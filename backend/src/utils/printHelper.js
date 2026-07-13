@@ -124,6 +124,12 @@ async function printOrderReceipt(order) {
       return;
     }
 
+    const formatTotalLine = (label, value) => {
+      const valStr = `${value.toFixed(2)} EUR`;
+      const spaces = 42 - label.length - valStr.length;
+      return label + ''.padStart(spaces > 0 ? spaces : 1, ' ') + valStr + '\n';
+    };
+
     for (const printer of printers) {
       const { ipAddress, port, connectionType, name } = printer;
 
@@ -146,7 +152,7 @@ async function printOrderReceipt(order) {
       data += 'NIF: B-12345678\n';
       data += 'Tlf: 956 00 00 00\n';
       data += 'C/ Principal, Jerez de la Frontera\n';
-      data += '--------------------------------\n';
+      data += '------------------------------------------\n'; // 42 guiones
       
       // Detalles del Ticket / Factura Simplificada
       data += ESC + 'a' + '\x00'; // Izquierda
@@ -160,46 +166,50 @@ async function printOrderReceipt(order) {
         data += `Cliente: ${order.customer.name}\n`;
         if (order.customer.phone) data += `Tlf: ${order.customer.phone}\n`;
       }
-      data += '--------------------------------\n';
+      data += '------------------------------------------\n';
       
-      // Cabecera de artículos
-      data += 'Cant  Concepto           P.U   Importe\n';
-      data += '--------------------------------\n';
+      // Cabecera de artículos - 42 columnas: Cant(5) + Concepto(20) + P.U(8) + Importe(9)
+      data += 'Cant  Concepto            P.U    Importe  \n';
+      data += '------------------------------------------\n';
       
       // Artículos
       for (const item of order.items) {
-        const qtyStr = `${item.quantity}`.padEnd(5, ' ');
-        const nameStr = item.name.substring(0, 16).padEnd(17, ' ');
-        const priceStr = item.price.toFixed(2).padStart(5, ' ');
-        const subtotalStr = item.subtotal.toFixed(2).padStart(7, ' ');
+        const qtyStr = `${item.quantity}x`.padEnd(5, ' ');
+        const conceptStr = item.name.substring(0, 20).padEnd(20, ' ');
+        const priceStr = item.price.toFixed(2).padStart(8, ' ');
+        const subtotalStr = item.subtotal.toFixed(2).padStart(9, ' ');
         
-        data += `${qtyStr}${nameStr}${priceStr}${subtotalStr}\n`;
+        data += `${qtyStr}${conceptStr}${priceStr}${subtotalStr}\n`;
         if (item.modifiers && item.modifiers.length > 0) {
           data += `     * ${item.modifiers.join(', ')}\n`;
         }
       }
       
-      data += '--------------------------------\n';
+      data += '------------------------------------------\n';
       
       // Totales
       const subtotal = order.subtotal || (order.total / 1.10);
       const taxes = order.taxes || (order.total - subtotal);
       
-      data += `Base Imponible (10%):  ${subtotal.toFixed(2).padStart(10, ' ')} €\n`;
-      data += `I.V.A.:                 ${taxes.toFixed(2).padStart(10, ' ')} €\n`;
+      data += formatTotalLine('Base Imponible (10%):', subtotal);
+      data += formatTotalLine('I.V.A.:', taxes);
       if (order.discount > 0) {
-        data += `Descuento:             -${order.discount.toFixed(2).padStart(10, ' ')} €\n`;
+        data += formatTotalLine('Descuento:', -order.discount);
       }
-      data += '--------------------------------\n';
+      data += '------------------------------------------\n';
       
-      // TOTAL EN GRANDE
+      // TOTAL EN GRANDE (42 cols)
       data += ESC + 'E' + '\x01'; // Negrita ON
       data += ESC + '!' + '\x10'; // Doble alto
-      data += `TOTAL:             ${order.total.toFixed(2)} €\n`;
+      const totalLabel = 'TOTAL:';
+      const totalValStr = `${order.total.toFixed(2)} EUR`;
+      // TOTAL está en doble alto pero en cuanto a caracteres horizontales cuenta igual, calculamos espacios para alinear a la derecha
+      const totalSpaces = 42 - totalLabel.length - totalValStr.length;
+      data += totalLabel + ''.padStart(totalSpaces > 0 ? totalSpaces : 1, ' ') + totalValStr + '\n';
       data += ESC + '!' + '\x00'; // Normal
       data += ESC + 'E' + '\x00'; // Negrita OFF
       
-      data += '--------------------------------\n';
+      data += '------------------------------------------\n';
       
       let methodStr = 'EFECTIVO';
       if (order.paymentMethod === 'card' || order.paymentMethod === 'tarjeta') {
