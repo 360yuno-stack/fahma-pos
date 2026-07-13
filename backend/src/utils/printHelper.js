@@ -58,14 +58,27 @@ async function printOrderComanda(order) {
         data += GS + 'V' + '\x41' + '\x03'; // Corte de papel
 
         if (connectionType === 'system') {
-          // Impresión USB compartida localmente en Windows (ej: \\localhost\BARRA)
-          const sharePath = `\\\\localhost\\${name}`;
-          console.log(`Impresión USB: Escribiendo comanda en ${sharePath}...`);
+          // Impresión USB local directa en Windows vía Spooler API
+          const path = require('path');
+          const { exec } = require('child_process');
+          const tempDir = process.env.TEMP || '/tmp';
+          const tempBinPath = path.join(tempDir, `fahma_print_${Date.now()}.bin`);
+          const psScriptPath = path.join(__dirname, 'print_raw.ps1');
+
           try {
-            fs.writeFileSync(sharePath, data, 'latin1');
-            console.log(`Comanda USB en ${name} enviada con éxito.`);
+            fs.writeFileSync(tempBinPath, data, 'latin1');
+            const cmd = `powershell.exe -ExecutionPolicy Bypass -File "${psScriptPath}" "${name}" "${tempBinPath}"`;
+            
+            exec(cmd, (err) => {
+              try { fs.unlinkSync(tempBinPath); } catch (e) {}
+              if (err) {
+                console.error(`Error de impresión USB en ${name} vía Spooler:`, err.message);
+              } else {
+                console.log(`Comanda USB en ${name} enviada con éxito al Spooler.`);
+              }
+            });
           } catch (err) {
-            console.error(`Error de impresión USB en ${name} (${sharePath}):`, err.message);
+            console.error(`Error al escribir temporal para USB en ${name}:`, err.message);
           }
         } else {
           // Impresión de Red TCP/IP

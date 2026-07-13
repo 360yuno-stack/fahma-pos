@@ -81,17 +81,28 @@ router.post('/:id/test', async (req, res) => {
     data += GS + 'V' + '\x41' + '\x03'; // Cut
 
     if (printer.connectionType === 'system') {
-      const sharePath = `\\\\localhost\\${printer.name}`;
-      console.log(`Prueba USB: Escribiendo en ${sharePath}...`);
+      const path = require('path');
+      const { exec } = require('child_process');
+      const tempDir = process.env.TEMP || '/tmp';
+      const tempBinPath = path.join(tempDir, `fahma_test_${Date.now()}.bin`);
+      const psScriptPath = path.join(__dirname, '..', 'utils', 'print_raw.ps1');
+
+      console.log(`Prueba USB Spooler: Enviando a ${printer.name}...`);
       try {
-        fs.writeFileSync(sharePath, data, 'latin1');
-        res.json({ success: true, message: `Prueba enviada con éxito por USB a ${printer.name} (${sharePath})` });
-      } catch (err) {
-        console.error(`Error en prueba de impresión USB en ${printer.name}:`, err.message);
-        res.status(500).json({ 
-          success: false, 
-          message: `Error al imprimir por USB en la impresora de Windows compartida como '${printer.name}' (${sharePath}). Asegúrate de compartirla en las propiedades de Windows. Detalle: ${err.message}` 
+        fs.writeFileSync(tempBinPath, data, 'latin1');
+        const cmd = `powershell.exe -ExecutionPolicy Bypass -File "${psScriptPath}" "${printer.name}" "${tempBinPath}"`;
+        
+        exec(cmd, (err) => {
+          try { fs.unlinkSync(tempBinPath); } catch (e) {}
+          if (err) {
+            console.error(`Error en prueba de impresión USB Spooler en ${printer.name}:`, err.message);
+            return res.status(500).json({ success: false, message: `Error de impresión USB Spooler: ${err.message}` });
+          }
+          res.json({ success: true, message: `Prueba enviada con éxito por USB a ${printer.name}` });
         });
+      } catch (err) {
+        console.error(`Error al escribir temporal para prueba USB en ${printer.name}:`, err.message);
+        res.status(500).json({ success: false, message: `Error al crear archivo temporal: ${err.message}` });
       }
     } else {
       const ipAddress = printer.ipAddress;
