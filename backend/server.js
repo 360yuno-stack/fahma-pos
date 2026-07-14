@@ -98,6 +98,62 @@ const server = app.listen(PORT, () => {
   console.log('');
 });
 
+// Inicializar Socket.io
+const io = require('socket.io')(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
+});
+app.set('io', io);
+global.io = io;
+
+io.on('connection', (socket) => {
+  console.log('Cliente Socket.io conectado:', socket.id);
+  
+  // Registrar el agente de impresión de la caja
+  socket.on('join:printer-agent', () => {
+    socket.join('printer-agent-room');
+    console.log('🔌 Agente de impresión local de la caja registrado y listo.');
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Cliente Socket.io desconectado:', socket.id);
+  });
+});
+
+// Si estamos en la caja (local) y se ha configurado CLOUD_BRIDGE_URL,
+// actuar como puente cliente para retransmitir las impresiones de la nube
+if (process.env.CLOUD_BRIDGE_URL) {
+  console.log(`🔌 Iniciando puente cliente de impresión hacia: ${process.env.CLOUD_BRIDGE_URL}`);
+  const { io: ioClient } = require('socket.io-client');
+  const clientSocket = ioClient(process.env.CLOUD_BRIDGE_URL);
+
+  clientSocket.on('connect', () => {
+    console.log('✅ Puente de Impresión: Conectado al servidor en la nube.');
+    clientSocket.emit('join:printer-agent');
+  });
+
+  clientSocket.on('print:job', async (job) => {
+    console.log(`🖨️  Puente de Impresión: Recibido trabajo de impresión (${job.type})`);
+    try {
+      const { printOrderComanda, printOrderReceipt } = require('./src/utils/printHelper');
+      if (job.type === 'comanda') {
+        await printOrderComanda(job.order);
+      } else if (job.type === 'receipt') {
+        await printOrderReceipt(job.order);
+      }
+    } catch (err) {
+      console.error('Error al ejecutar impresión puente:', err.message);
+    }
+  });
+
+  clientSocket.on('disconnect', () => {
+    console.log('⚠️  Puente de Impresión: Conexión perdida con la nube. Reintentando...');
+  });
+}
+
 process.on('unhandledRejection', (err) => {
   console.error('Error no capturado:', err.message);
   server.close(() => process.exit(1));

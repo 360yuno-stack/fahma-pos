@@ -3,6 +3,16 @@ const fs = require('fs');
 const Printer = require('../models/Printer');
 
 async function printOrderComanda(order) {
+  if (process.env.IS_CLOUD_SERVER === 'true') {
+    if (global.io) {
+      console.log('Nube: Transmitiendo evento comanda a la caja...');
+      global.io.to('printer-agent-room').emit('print:job', { type: 'comanda', order });
+    } else {
+      console.warn('Nube: Socket.io no inicializado en servidor.');
+    }
+    return;
+  }
+
   try {
     // 1. Obtener impresoras activas
     const printers = await Printer.find({ isActive: true });
@@ -110,6 +120,16 @@ async function printOrderComanda(order) {
 }
 
 async function printOrderReceipt(order) {
+  if (process.env.IS_CLOUD_SERVER === 'true') {
+    if (global.io) {
+      console.log('Nube: Transmitiendo evento recibo a la caja...');
+      global.io.to('printer-agent-room').emit('print:job', { type: 'receipt', order });
+    } else {
+      console.warn('Nube: Socket.io no inicializado en servidor.');
+    }
+    return;
+  }
+
   try {
     // 1. Obtener impresoras de facturación activas
     let printers = await Printer.find({ isActive: true, type: 'facturacion' });
