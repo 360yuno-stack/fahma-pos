@@ -126,4 +126,10 @@ export const providersAPI = {
   delete: (id) => api.delete(`/providers/${id}`),
 };
 
+export const invoicesAPI = {
+  getAll: (params) => api.get('/invoices', { params }),
+  upload: (formData) => api.post('/invoices', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  delete: (id) => api.delete(`/invoices/${id}`),
+};
+
 export default api;

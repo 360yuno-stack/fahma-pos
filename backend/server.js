@@ -62,6 +62,7 @@ app.use('/api/modifiers', require('./src/routes/modifierRoutes'));
 app.use('/api/printers', require('./src/routes/printerRoutes'));
 app.use('/api/attendance', require('./src/routes/attendanceRoutes'));
 app.use('/api/verifactu', require('./src/routes/verifactuRoutes'));
+app.use('/api/invoices', require('./src/routes/invoiceRoutes'));
 
 // Health check
 app.get('/api/health', (req, res) => {

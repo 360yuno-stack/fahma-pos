@@ -1,0 +1,252 @@
+.invoices-page {
+  padding: 24px;
+  animation: fadeIn 0.3s ease;
+}
+
+.invoices-grid {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+@media (max-width: 992px) {
+  .invoices-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.invoices-card {
+  background: var(--bg-card, #1e1e2d);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #2f2f3f);
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.invoices-card h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-color, #ffffff);
+  margin-bottom: 20px;
+}
+
+.upload-section form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #a0aec0;
+}
+
+.form-group select,
+.form-group input {
+  background: #151521;
+  border: 1px solid #2f2f3f;
+  border-radius: 8px;
+  color: #fff;
+  padding: 10px 14px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+  border-color: #6366f1;
+  outline: none;
+}
+
+.file-drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #2f2f3f;
+  border-radius: 8px;
+  padding: 24px;
+  background: #151521;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.file-drop-zone:hover {
+  border-color: #6366f1;
+  background: #1b1b2d;
+}
+
+.file-drop-zone input[type="file"] {
+  display: none;
+}
+
+.upload-icon {
+  font-size: 32px;
+  color: #6366f1;
+  margin-bottom: 8px;
+}
+
+.upload-text {
+  font-size: 12px;
+  color: #a0aec0;
+  text-align: center;
+  word-break: break-all;
+}
+
+.w-full {
+  width: 100%;
+}
+
+/* List section */
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.list-header h2 {
+  margin-bottom: 0;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: #718096;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.invoices-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoices-table th,
+.invoices-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid #2f2f3f;
+  font-size: 14px;
+}
+
+.invoices-table th {
+  color: #a0aec0;
+  font-weight: 500;
+  background: #151521;
+}
+
+.invoice-file-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 250px;
+}
+
+.file-type-icon {
+  font-size: 28px;
+}
+
+.file-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.file-name {
+  color: #fff;
+  font-weight: 500;
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.invoice-notes {
+  color: #a0aec0;
+  font-size: 13px;
+}
+
+.invoice-date-cell {
+  color: #718096;
+  white-space: nowrap;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  padding: 0;
+  font-size: 16px;
+}
+
+.btn-outline-success {
+  border: 1px solid #10b981;
+  color: #10b981;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-outline-success:hover {
+  background: #10b981;
+  color: #fff;
+}
+
+.btn-outline-danger {
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-outline-danger:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+.spinner-border {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  vertical-align: text-bottom;
+  border: .15em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-border .75s linear infinite;
+  margin-right: 6px;
+}
+
+@keyframes spinner-border {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

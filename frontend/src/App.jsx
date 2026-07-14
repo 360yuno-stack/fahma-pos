@@ -28,6 +28,7 @@ import MenuPreview from './pages/MenuPreview';
 import Printers from './pages/Printers';
 import VerifactuConfig from './pages/VerifactuConfig';
 import Attendance from './pages/Attendance';
+import Invoices from './pages/Invoices';
 
 function App() {
   const { isAuthenticated, loading } = useAuth();
@@ -73,6 +74,7 @@ function App() {
         <Route path="/asistencia" element={<Attendance />} />
         <Route path="/impresoras" element={<Printers />} />
         <Route path="/verifactu" element={<VerifactuConfig />} />
+        <Route path="/asesoria" element={<Invoices />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
       <Route path="/menu-preview" element={<MenuPreview />} />

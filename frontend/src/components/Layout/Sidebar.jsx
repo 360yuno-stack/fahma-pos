@@ -48,6 +48,7 @@ export default function Sidebar({ collapsed, onToggle }) {
     { to: '/reportes', icon: 'mdi-chart-bar', label: 'Estadísticas Ventas' },
     { to: '/cierre-caja', icon: 'mdi-cash-lock', label: 'Cierre de Caja' },
     { to: '/gastos', icon: 'mdi-cash-minus', label: 'Gastos' },
+    { to: '/asesoria', icon: 'mdi-file-cabinet', label: 'Asesoría (Facturas)' },
   ];
 
   const configItems = [
