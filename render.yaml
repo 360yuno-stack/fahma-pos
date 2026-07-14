@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: fahma-pos
+    runtime: node
+    buildCommand: npm install
+    startCommand: node server.js
+    rootDir: backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: IS_CLOUD_SERVER
+        value: "true"
+      - key: MONGODB_URI
+        value: mongodb+srv://elfogondelaguila_db_user:C1LHFcQDxDAuhQBu@cluster0.72pgupp.mongodb.net/fahma_pos?retryWrites=true&w=majority
+      - key: JWT_SECRET
+        value: clave_secreta_tpv_del_aguila_2026
+      - key: ALLOWED_ORIGINS
+        value: "*"
