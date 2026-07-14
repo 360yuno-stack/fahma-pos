@@ -11,7 +11,7 @@ export default function Login() {
   const [error, setError] = useState('');
 
   const { login } = useAuth();
-  const { showToast } = useToast();
+  const { addToast } = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -26,7 +26,7 @@ export default function Login() {
     setLoading(true);
     try {
       await login(username, password);
-      showToast('Inicio de sesión exitoso', 'success');
+      addToast('Inicio de sesión exitoso', 'success');
       navigate('/dashboard');
     } catch (err) {
       const message =
