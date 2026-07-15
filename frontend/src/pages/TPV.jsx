@@ -87,6 +87,7 @@ export default function TPV() {
     fetchCategories();
     fetchTables();
     fetchModifiers();
+    fetchAllProducts();
   }, []);
 
   // Load products when category changes
@@ -149,6 +150,16 @@ export default function TPV() {
     }
   }
 
+  async function fetchAllProducts() {
+    try {
+      const res = await productsAPI.getAll();
+      const list = Array.isArray(res.data) ? res.data : (res.data?.data || res.data?.products || []);
+      setAllProducts(list);
+    } catch (err) {
+      console.error('Error fetching all products:', err);
+    }
+  }
+
   // Filter products by search
   const filteredProducts = products.filter(p => {
     if (p.isAvailable === false) return false;
@@ -162,6 +173,52 @@ export default function TPV() {
     const productId = product._id || product.id;
     const productName = product.name || product.nombre || 'Producto';
     const productPrice = product.price ?? product.precio ?? 0;
+
+    // Detectar si es un cubo
+    const productCategory = categories.find(c => {
+      const pCatId = product.category?._id || product.category?.id || product.category;
+      const cId = c._id || c.id;
+      return pCatId && cId && pCatId.toString() === cId.toString();
+    });
+    const isCubo = (productCategory && (productCategory.name || productCategory.nombre || '').toLowerCase().includes('cubo')) ||
+                  productName.toLowerCase().includes('cubo');
+
+    if (isCubo) {
+      // Buscar la categoría "1/2 Ración"
+      const halfPortionCategory = categories.find(c => {
+        const cName = (c.name || c.nombre || '').toLowerCase();
+        return cName.includes('1/2 ración') || cName.includes('1/2 racion') || cName.includes('media racion') || cName.includes('medias raciones');
+      });
+
+      if (halfPortionCategory) {
+        const targetCatId = halfPortionCategory._id || halfPortionCategory.id;
+        const halfPortionProducts = allProducts.filter(p => {
+          const pCatId = p.category?._id || p.category?.id || p.category;
+          return pCatId && targetCatId && pCatId.toString() === targetCatId.toString();
+        });
+
+        if (halfPortionProducts.length > 0) {
+          const virtualModifier = {
+            _id: 'virtual-half-portion',
+            name: 'Elige tu 1/2 Ración',
+            isRequired: true,
+            multiple: false,
+            options: halfPortionProducts.map(p => ({
+              name: p.name || p.nombre,
+              price: 0
+            }))
+          };
+
+          setModifiersProduct(product);
+          setApplicableModifiers([virtualModifier]);
+          setSelectedModifierOptions({
+            'virtual-half-portion': [virtualModifier.options[0].name]
+          });
+          setIsModifiersModalOpen(true);
+          return;
+        }
+      }
+    }
 
     const prodModifiers = modifiers.filter(m => m.products && m.products.includes(productId));
     if (prodModifiers.length > 0) {
