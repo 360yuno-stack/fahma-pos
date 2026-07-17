@@ -1,12 +1,12 @@
-# 🛠️ Script de Instalación Automatizada para el TPV de la Caja
-# El Fogón del Águila - FAHMA POS
+# Script de Instalacion Automatizada para el TPV de la Caja
+# El Fogon del Aguila - FAHMA POS
 
 $PSScriptRoot = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
 if ([string]::IsNullOrEmpty($PSScriptRoot)) { $PSScriptRoot = Get-Location }
 
 Write-Host ""
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "   INSTALADOR AUTOMÁTICO DE TPV (PUENTE DE IMPRESIÓN)" -ForegroundColor Cyan
+Write-Host "   INSTALADOR AUTOMATICO DE TPV (PUENTE DE IMPRESION)" -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -22,14 +22,14 @@ CLOUD_BRIDGE_URL=https://fahma-pos.onrender.com
 "@
 
 [System.IO.File]::WriteAllText($envPath, $envContent)
-Write-Host "   ✅ Archivo .env configurado correctamente." -ForegroundColor Green
+Write-Host "   [OK] Archivo .env configurado correctamente." -ForegroundColor Green
 
 # 2. Instalar dependencias en el backend
 Write-Host ""
 Write-Host "2. Instalando dependencias de Node.js (esto puede tardar unos segundos)..." -ForegroundColor Yellow
 cd "$PSScriptRoot\backend"
 npm install --no-audit --no-fund
-Write-Host "   ✅ Dependencias instaladas con éxito." -ForegroundColor Green
+Write-Host "   [OK] Dependencias instaladas con exito." -ForegroundColor Green
 
 # 3. Crear acceso directo en el escritorio
 Write-Host ""
@@ -45,10 +45,10 @@ $Shortcut.Description = "Arranca el puente de impresion y abre el TPV en la nube
 $Shortcut.WorkingDirectory = "$PSScriptRoot\backend"
 $Shortcut.Save()
 
-Write-Host "   ✅ Acceso directo creado en el Escritorio con éxito." -ForegroundColor Green
+Write-Host "   [OK] Acceso directo creado en el Escritorio con exito." -ForegroundColor Green
 Write-Host ""
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "   ¡INSTALACIÓN COMPLETADA CON ÉXITO!" -ForegroundColor Green
+Write-Host "   INSTALACION COMPLETADA CON EXITO!" -ForegroundColor Green
 Write-Host "   Ya puedes hacer doble clic en el icono del Escritorio" -ForegroundColor Yellow
 Write-Host "   para iniciar el TPV y habilitar las impresoras." -ForegroundColor Yellow
 Write-Host "==========================================================" -ForegroundColor Cyan
