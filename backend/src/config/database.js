@@ -21,11 +21,19 @@ const connectDB = async () => {
         const conn = await mongoose.connect(localUri);
         console.log('MongoDB local conectado: ' + conn.connection.host);
       } catch (err) {
-        console.error('❌ Error crítico: Tampoco se pudo conectar a MongoDB Local: ' + err.message);
-        process.exit(1);
+        console.error('❌ Error conectando a MongoDB Local: ' + err.message);
+        if (process.env.CLOUD_BRIDGE_URL) {
+          console.log('ℹ️  Modo Puente de Impresión activo: El servidor continuará escuchando eventos de impresión sin BD local.');
+        } else {
+          process.exit(1);
+        }
       }
     } else {
-      process.exit(1);
+      if (process.env.CLOUD_BRIDGE_URL) {
+        console.log('ℹ️  Modo Puente de Impresión activo: El servidor continuará escuchando eventos de impresión sin BD local.');
+      } else {
+        process.exit(1);
+      }
     }
   }
 };

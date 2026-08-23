@@ -141,9 +141,9 @@ if (process.env.CLOUD_BRIDGE_URL) {
     try {
       const { printOrderComanda, printOrderReceipt } = require('./src/utils/printHelper');
       if (job.type === 'comanda') {
-        await printOrderComanda(job.order);
+        await printOrderComanda(job.order, job.printers);
       } else if (job.type === 'receipt') {
-        await printOrderReceipt(job.order);
+        await printOrderReceipt(job.order, job.printers);
       }
     } catch (err) {
       console.error('Error al ejecutar impresión puente:', err.message);

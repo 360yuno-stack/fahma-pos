@@ -2,11 +2,16 @@ const net = require('net');
 const fs = require('fs');
 const Printer = require('../models/Printer');
 
-async function printOrderComanda(order) {
+async function printOrderComanda(order, passedPrinters = null) {
   if (process.env.IS_CLOUD_SERVER === 'true') {
     if (global.io) {
       console.log('Nube: Transmitiendo evento comanda a la caja...');
-      global.io.to('printer-agent-room').emit('print:job', { type: 'comanda', order });
+      try {
+        const printers = await Printer.find({ isActive: true });
+        global.io.to('printer-agent-room').emit('print:job', { type: 'comanda', order, printers });
+      } catch (e) {
+        global.io.to('printer-agent-room').emit('print:job', { type: 'comanda', order });
+      }
     } else {
       console.warn('Nube: Socket.io no inicializado en servidor.');
     }
@@ -14,9 +19,12 @@ async function printOrderComanda(order) {
   }
 
   try {
-    // 1. Obtener impresoras activas
-    const printers = await Printer.find({ isActive: true });
-    if (printers.length === 0) return;
+    // 1. Obtener impresoras activas (usar pasadas por socket o buscar en BD)
+    let printers = passedPrinters;
+    if (!printers || printers.length === 0) {
+      printers = await Printer.find({ isActive: true });
+    }
+    if (!printers || printers.length === 0) return;
 
     for (const printer of printers) {
       const { ipAddress, port, categories, connectionType, name } = printer;
@@ -119,11 +127,19 @@ async function printOrderComanda(order) {
   }
 }
 
-async function printOrderReceipt(order) {
+async function printOrderReceipt(order, passedPrinters = null) {
   if (process.env.IS_CLOUD_SERVER === 'true') {
     if (global.io) {
       console.log('Nube: Transmitiendo evento recibo a la caja...');
-      global.io.to('printer-agent-room').emit('print:job', { type: 'receipt', order });
+      try {
+        let printers = await Printer.find({ isActive: true, type: 'facturacion' });
+        if (printers.length === 0) {
+          printers = await Printer.find({ isActive: true, type: 'barra' });
+        }
+        global.io.to('printer-agent-room').emit('print:job', { type: 'receipt', order, printers });
+      } catch (e) {
+        global.io.to('printer-agent-room').emit('print:job', { type: 'receipt', order });
+      }
     } else {
       console.warn('Nube: Socket.io no inicializado en servidor.');
     }
@@ -131,15 +147,16 @@ async function printOrderReceipt(order) {
   }
 
   try {
-    // 1. Obtener impresoras de facturación activas
-    let printers = await Printer.find({ isActive: true, type: 'facturacion' });
-    
-    // Si no hay impresoras de facturación, buscar la de barra por defecto
-    if (printers.length === 0) {
-      printers = await Printer.find({ isActive: true, type: 'barra' });
+    // 1. Obtener impresoras de facturación activas (pasadas por socket o de BD)
+    let printers = passedPrinters;
+    if (!printers || printers.length === 0) {
+      printers = await Printer.find({ isActive: true, type: 'facturacion' });
+      if (printers.length === 0) {
+        printers = await Printer.find({ isActive: true, type: 'barra' });
+      }
     }
     
-    if (printers.length === 0) {
+    if (!printers || printers.length === 0) {
       console.log('No se encontraron impresoras activas de facturación o barra para el ticket de venta.');
       return;
     }
