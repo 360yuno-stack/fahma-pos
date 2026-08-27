@@ -150,6 +150,56 @@ if (process.env.CLOUD_BRIDGE_URL) {
     }
   });
 
+  clientSocket.on('print:test', async (job) => {
+    console.log(`🖨️  Puente de Impresión: Recibido trabajo de prueba para ${job.printer.name}`);
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const { exec } = require('child_process');
+      const net = require('net');
+
+      const printer = job.printer;
+      const data = job.data;
+
+      if (printer.connectionType === 'system') {
+        const tempDir = process.env.TEMP || '/tmp';
+        const tempBinPath = path.join(tempDir, `fahma_test_${Date.now()}.bin`);
+        const psScriptPath = path.join(__dirname, 'src', 'utils', 'print_raw.ps1');
+
+        fs.writeFileSync(tempBinPath, data, 'latin1');
+        const cmd = `powershell.exe -ExecutionPolicy Bypass -File "${psScriptPath}" "${printer.name}" "${tempBinPath}"`;
+        
+        exec(cmd, (err) => {
+          try { fs.unlinkSync(tempBinPath); } catch (e) {}
+          if (err) {
+            console.error(`Error en prueba USB Spooler puente:`, err.message);
+          }
+        });
+      } else {
+        const ipAddress = printer.ipAddress;
+        const port = printer.port || 9100;
+        const client = new net.Socket();
+        client.setTimeout(3000);
+
+        client.connect(port, ipAddress, () => {
+          client.write(data, 'latin1', () => {
+            client.end();
+          });
+        });
+
+        client.on('error', (err) => {
+          console.error(`Error de red en impresora puente:`, err.message);
+        });
+
+        client.on('timeout', () => {
+          client.destroy();
+        });
+      }
+    } catch (err) {
+      console.error('Error al ejecutar prueba puente:', err.message);
+    }
+  });
+
   clientSocket.on('disconnect', () => {
     console.log('⚠️  Puente de Impresión: Conexión perdida con la nube. Reintentando...');
   });

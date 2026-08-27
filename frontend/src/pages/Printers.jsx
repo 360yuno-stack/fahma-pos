@@ -221,7 +221,7 @@ export default function Printers() {
                         value={formData.ipAddress}
                         onChange={e => setFormData({ ...formData, ipAddress: e.target.value })}
                         placeholder="192.168.1.100"
-                        required
+                        required={formData.connectionType === 'tcp'}
                       />
                     </div>
                     <div className="form-group">

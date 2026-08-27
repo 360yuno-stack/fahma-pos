@@ -29,6 +29,7 @@ PORT=5000
 NODE_ENV=development
 MONGODB_URI=mongodb+srv://elfogondelaguila_db_user:C1LHFcQDxDAuhQBu@cluster0.72pgupp.mongodb.net/fahma_pos?retryWrites=true&w=majority
 CLOUD_BRIDGE_URL=https://fahma-pos.onrender.com
+JWT_SECRET=fahma_secret_key_2025_super_segura
 "@
 
 [System.IO.File]::WriteAllText($envPath, $envContent)

@@ -31,10 +31,35 @@ async function printOrderComanda(order, passedPrinters = null) {
       const printerCategoryIds = categories.map(c => c.toString());
 
       // 2. Filtrar los artículos que corresponden a las categorías de esta impresora
-      const printerItems = order.items.filter(item => {
-        if (!item.product || !item.product.category) return false;
-        return printerCategoryIds.includes(item.product.category.toString());
-      });
+      const printerItems = [];
+      for (const item of order.items) {
+        let categoryId = null;
+
+        if (item.product) {
+          if (item.product.category) {
+            categoryId = item.product.category._id 
+              ? item.product.category._id.toString() 
+              : item.product.category.toString();
+          } else {
+            const productId = item.product._id || item.product;
+            if (productId) {
+              try {
+                const Product = require('../models/Product');
+                const prod = await Product.findById(productId);
+                if (prod && prod.category) {
+                  categoryId = prod.category.toString();
+                }
+              } catch (e) {
+                console.error('Error al buscar categoría del producto en DB para impresión:', e.message);
+              }
+            }
+          }
+        }
+
+        if (categoryId && printerCategoryIds.includes(categoryId)) {
+          printerItems.push(item);
+        }
+      }
 
       // 3. Si hay artículos, enviar comanda
       if (printerItems.length > 0) {

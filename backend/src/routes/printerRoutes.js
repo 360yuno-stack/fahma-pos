@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Printer = require('../models/Printer');
+const net = require('net');
+
 
 // GET /api/printers
 router.get('/', async (req, res) => {
@@ -79,6 +81,17 @@ router.post('/:id/test', async (req, res) => {
     data += '-------------------------------\n';
     data += '\n\n\n\n';
     data += GS + 'V' + '\x41' + '\x03'; // Cut
+
+    if (process.env.IS_CLOUD_SERVER === 'true') {
+      const io = req.app.get('io') || global.io;
+      if (io) {
+        console.log('Nube: Transmitiendo prueba de impresión a la caja...');
+        io.to('printer-agent-room').emit('print:test', { printer, data });
+        return res.json({ success: true, message: `Prueba de impresión enviada a la caja para ${printer.name}` });
+      } else {
+        return res.status(500).json({ success: false, message: 'Socket.io no inicializado en el servidor en la nube' });
+      }
+    }
 
     if (printer.connectionType === 'system') {
       const path = require('path');

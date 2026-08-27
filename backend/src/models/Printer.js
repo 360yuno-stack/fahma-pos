@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const printerSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  ipAddress: { type: String, required: true },
+  ipAddress: { type: String },
   port: { type: Number, default: 9100 },
   type: { 
     type: String, 
