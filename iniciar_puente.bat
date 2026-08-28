@@ -41,8 +41,17 @@ goto salir
 echo.
 echo Iniciando Puente de Impresion para la Nube...
 echo.
-set /p vercel_url="Introduce tu URL de Vercel (deja vacio para usar por defecto): "
+if exist .vercel_url (
+    set /p vercel_url=<.vercel_url
+) else (
+    set /p vercel_url="Introduce tu URL de Vercel (ej: https://tu-proyecto.vercel.app): "
+    if not "%vercel_url%"=="" (
+        <nul set /p="%vercel_url%">.vercel_url
+    )
+)
 if "%vercel_url%"=="" set vercel_url=https://fahma-pos.vercel.app
+echo.
+echo Abriendo TPV en la nube: %vercel_url%
 start "" "%vercel_url%"
 cd /d "%~dp0backend"
 node server.js
