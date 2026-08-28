@@ -15,7 +15,8 @@ function Settings() {
     taxRate: 10,
     currency: 'EUR',
     nif: '',
-    ticketFooterText: ''
+    ticketFooterText: '',
+    logo: ''
   });
 
   useEffect(() => { fetchSettings(); }, []);
@@ -32,7 +33,8 @@ function Settings() {
         taxRate: data.taxRate ?? 10,
         currency: data.currency || 'EUR',
         nif: data.nif || '',
-        ticketFooterText: data.ticketFooterText || ''
+        ticketFooterText: data.ticketFooterText || '',
+        logo: data.logo || ''
       });
     } catch (err) {
       addToast('Error al cargar configuración', 'error');
@@ -117,6 +119,19 @@ function Settings() {
           <div className="form-group">
             <label className="form-label">Texto de Pie de Ticket (Agradecimiento)</label>
             <input className="form-input" value={form.ticketFooterText} onChange={e => setForm({...form, ticketFooterText: e.target.value})} placeholder="Ej: ¡¡¡MUCHAS GRACIAS POR SU VISITA!!!" />
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group" style={{ flex: 1 }}>
+            <label className="form-label">Ruta o URL del Logo de los Tickets</label>
+            <input className="form-input" value={form.logo} onChange={e => setForm({...form, logo: e.target.value})} placeholder="Ej: /logo.jpg" />
+            {form.logo && (
+              <div style={{ marginTop: '12px' }}>
+                <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '6px' }}>Vista Previa:</span>
+                <img src={form.logo} alt="Logo" style={{ maxHeight: '60px', objectFit: 'contain', display: 'block', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '6px', background: '#ffffff' }} />
+              </div>
+            )}
           </div>
         </div>
 
