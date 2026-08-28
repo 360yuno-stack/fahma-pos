@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ordersAPI, settingsAPI } from '../services/api';
+import api, { ordersAPI, settingsAPI } from '../services/api';
 import { useToast } from '../context/ToastContext';
 import './Orders.css';
 

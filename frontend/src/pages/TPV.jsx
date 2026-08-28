@@ -501,7 +501,22 @@ export default function TPV() {
             className={`tpv-category-btn ${selectedCategory === null ? 'tpv-category-btn--active' : ''}`}
             onClick={() => { setSelectedCategory(null); setSelectedSubCategory(null); }}
           >
-            <span className="tpv-category-icon mdi mdi-view-grid" />
+            <div 
+              className="tpv-category-icon-wrapper" 
+              style={{ 
+                backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                color: 'var(--color-primary)',
+                borderRadius: '8px',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              <span className="mdi mdi-view-grid" style={{ fontSize: '18px' }} />
+            </div>
             <span className="tpv-category-name">Todas</span>
           </button>
 
@@ -513,17 +528,29 @@ export default function TPV() {
             mainCategories.map(cat => {
               const catId = cat._id || cat.id;
               const isActive = selectedCategory && (selectedCategory._id || selectedCategory.id) === catId;
+              const color = getCategoryColor(cat);
               return (
                 <button
                   key={catId}
                   className={`tpv-category-btn ${isActive ? 'tpv-category-btn--active' : ''}`}
                   onClick={() => { setSelectedCategory(cat); setSelectedSubCategory(null); }}
                 >
-                  <div
-                    className="tpv-category-color"
-                    style={{ backgroundColor: getCategoryColor(cat) }}
-                  />
-                  <span className={`tpv-category-icon mdi ${getCategoryIcon(cat)}`} />
+                  <div 
+                    className="tpv-category-icon-wrapper" 
+                    style={{ 
+                      backgroundColor: `${color}20`,
+                      color: color,
+                      borderRadius: '8px',
+                      width: '32px',
+                      height: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}
+                  >
+                    <span className={`mdi ${getCategoryIcon(cat)}`} style={{ fontSize: '18px' }} />
+                  </div>
                   <span className="tpv-category-name">
                     {cat.name || cat.nombre || 'Sin nombre'}
                   </span>
@@ -618,35 +645,34 @@ export default function TPV() {
                   onClick={() => addToTicket(product)}
                 >
                   <div className="tpv-product-color-strip" style={{ backgroundColor: catColor }} />
-                  <button 
-                    className="tpv-quick-edit-btn no-print" 
-                    style={{ 
-                      position: 'absolute', 
-                      top: '6px', 
-                      right: '6px', 
-                      background: 'rgba(255,255,255,0.85)', 
-                      border: 'none', 
-                      borderRadius: '50%', 
-                      width: '24px', 
-                      height: '24px', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      cursor: 'pointer',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
-                      zIndex: 2
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openQuickEdit(product);
-                    }}
-                  >
-                    <span className="mdi mdi-pencil" style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }} />
-                  </button>
-                  <div className="tpv-product-name" style={{ paddingRight: '20px' }}>{prodName}</div>
-                  <div className="tpv-product-price">{formatCurrency(prodPrice)}</div>
+                  <div className="tpv-product-name">{prodName}</div>
+                  <div className="tpv-product-footer-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                    <div className="tpv-product-price" style={{ margin: 0 }}>{formatCurrency(prodPrice)}</div>
+                    <button 
+                      className="tpv-quick-edit-btn no-print" 
+                      style={{ 
+                        background: 'var(--color-bg)', 
+                        border: '1px solid var(--color-border)', 
+                        borderRadius: '6px', 
+                        width: '26px', 
+                        height: '26px', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        margin: 0
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openQuickEdit(product);
+                      }}
+                    >
+                      <span className="mdi mdi-pencil-outline" style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }} />
+                    </button>
+                  </div>
                   {product.category?.name && (
-                    <div className="tpv-product-category">
+                    <div className="tpv-product-category" style={{ fontSize: '11px', opacity: 0.8, marginTop: '2px' }}>
                       {product.category.name || product.category.nombre}
                     </div>
                   )}
