@@ -3,7 +3,7 @@ const fs = require('fs');
 const Printer = require('../models/Printer');
 
 async function printOrderComanda(order, passedPrinters = null) {
-  if (process.env.IS_CLOUD_SERVER === 'true') {
+  if (process.env.IS_CLOUD_SERVER === 'true' || process.env.RENDER === 'true') {
     if (global.io) {
       console.log('Nube: Transmitiendo evento comanda a la caja...');
       try {
@@ -176,7 +176,7 @@ async function printOrderComanda(order, passedPrinters = null) {
 }
 
 async function printOrderReceipt(order, passedPrinters = null) {
-  if (process.env.IS_CLOUD_SERVER === 'true') {
+  if (process.env.IS_CLOUD_SERVER === 'true' || process.env.RENDER === 'true') {
     if (global.io) {
       console.log('Nube: Transmitiendo evento recibo a la caja...');
       try {

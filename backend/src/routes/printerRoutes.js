@@ -82,7 +82,7 @@ router.post('/:id/test', async (req, res) => {
     data += '\n\n\n\n';
     data += GS + 'V' + '\x41' + '\x03'; // Cut
 
-    if (process.env.IS_CLOUD_SERVER === 'true') {
+    if (process.env.IS_CLOUD_SERVER === 'true' || process.env.RENDER === 'true') {
       const io = req.app.get('io') || global.io;
       if (io) {
         console.log('Nube: Transmitiendo prueba de impresión a la caja...');
