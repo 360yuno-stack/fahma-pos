@@ -68,33 +68,56 @@ async function printOrderComanda(order, passedPrinters = null) {
         
         let data = '';
         data += ESC + '@'; // Inicializar
+        
+        // 1. Cabecera Comanda (Grande y Centrada)
         data += ESC + 'a' + '\x01'; // Centrar
+        data += GS + '!' + '\x11'; // Doble alto, doble ancho (2x)
         data += ESC + 'E' + '\x01'; // Negrita ON
-        data += `COMANDA: ${name.toUpperCase()}\n`;
+        data += `COMANDA: ${name.toUpperCase()}\n\n`;
+        
+        const mesaName = order.table ? (order.table.name || `MESA ${order.table.number}`) : 'PARA LLEVAR';
+        data += `${mesaName.toUpperCase()}\n`;
+        
+        data += GS + '!' + '\x01'; // Doble alto, ancho normal
+        data += `PEDIDO #: ${order.orderNumber}\n`;
+        data += GS + '!' + '\x00'; // Normal
         data += ESC + 'E' + '\x00'; // Negrita OFF
+        data += '------------------------------------------\n\n';
         
-        const mesaName = order.table ? (order.table.name || `Mesa ${order.table.number}`) : 'PARA LLEVAR / DOMICILIO';
-        data += `MESA / DESTINO: ${mesaName}\n`;
-        data += `Pedido #: ${order.orderNumber}\n`;
-        data += '-------------------------------\n\n';
-        
+        // 2. Artículos (Izquierda)
         data += ESC + 'a' + '\x00'; // Izquierda
         for (const item of printerItems) {
+          // Cantidad y Nombre en Grande y Negrita
+          data += GS + '!' + '\x11'; // Doble alto, doble ancho (2x)
+          data += ESC + 'E' + '\x01'; // Negrita ON
           data += `${item.quantity}x ${item.name.toUpperCase()}\n`;
+          data += GS + '!' + '\x00'; // Normal
+          data += ESC + 'E' + '\x00'; // Negrita OFF
+          
+          // Modificadores y Notas de producto en tamaño normal
           if (item.modifiers && item.modifiers.length > 0) {
-            data += `   * Modificadores: ${item.modifiers.join(', ')}\n`;
+            data += `   * MOD: ${item.modifiers.join(', ')}\n`;
           }
           if (item.notes) {
-            data += `   * NOTA: ${item.notes}\n`; // Casilla de anotación del producto
+            data += `   * NOTA: ${item.notes}\n`;
           }
+          data += '\n'; // Separación entre platos
         }
         
+        // 3. Notas generales del pedido
         if (order.notes) {
-          data += '\n-------------------------------\n';
-          data += `ANOTACION TICKET:\n${order.notes}\n`; // Casilla de anotación general del ticket
+          data += '------------------------------------------\n';
+          data += GS + '!' + '\x01'; // Doble alto
+          data += ESC + 'E' + '\x01'; // Negrita ON
+          data += 'ANOTACIONES GENERALES:\n';
+          data += GS + '!' + '\x11'; // Doble alto y doble ancho para la nota importante
+          data += `${order.notes.toUpperCase()}\n`;
+          data += GS + '!' + '\x00'; // Normal
+          data += ESC + 'E' + '\x00'; // Negrita OFF
         }
         
-        data += '-------------------------------\n';
+        // 4. Pie de Comanda
+        data += '------------------------------------------\n';
         data += `Hora: ${new Date().toLocaleTimeString()}\n`;
         data += `Camarero: ${order.server ? order.server.username : 'POS'}\n`;
         data += '\n\n\n\n';
