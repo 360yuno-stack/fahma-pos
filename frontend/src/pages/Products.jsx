@@ -20,6 +20,7 @@ const Products = () => {
     category: '',
     sku: '',
     isAvailable: true,
+    image: '',
   });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingProduct, setDeletingProduct] = useState(null);
@@ -77,6 +78,7 @@ const Products = () => {
       category: '',
       sku: '',
       isAvailable: true,
+      image: '',
     });
     setShowModal(true);
   };
@@ -91,6 +93,7 @@ const Products = () => {
       category: product.category || '',
       sku: product.sku || '',
       isAvailable: product.isAvailable !== undefined ? product.isAvailable : true,
+      image: product.image || '',
     });
     setShowModal(true);
   };
@@ -359,6 +362,31 @@ const Products = () => {
                       placeholder="Código SKU"
                     />
                   </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Ruta o URL de la Imagen</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    name="image"
+                    value={formData.image}
+                    onChange={handleChange}
+                    placeholder="Ej: /cervezas/heineken.jpg o /refrescos/cocacola.jpg"
+                  />
+                  {formData.image && (
+                    <div style={{ marginTop: '8px' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '4px' }}>Vista previa:</span>
+                      <div style={{
+                        width: '70px',
+                        height: '70px',
+                        borderRadius: '8px',
+                        backgroundImage: `url(${formData.image})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        border: '1px solid var(--color-border)'
+                      }} />
+                    </div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label className="form-label">Disponible</label>
