@@ -120,12 +120,7 @@ export default function Orders() {
             </style>
           </head>
           <body onload="window.print(); window.close();">
-            <h2 style="font-size: 16px; text-transform: uppercase; margin-bottom: 2px;">${settings?.restaurantName || 'EL FOGÓN DEL ÁGUILA'}</h2>
-            ${settings?.logo ? `
-              <div class="center" style="margin: 8px 0;">
-                <img src="${settings.logo}" style="max-width: 120px; max-height: 85px; object-fit: contain;" />
-              </div>
-            ` : ''}
+            <h2 style="font-size: 16px; text-transform: uppercase; margin-bottom: 2px;">${settings?.restaurantName || 'EL FOGON DEL AGUILA'}</h2>
             ${settings?.nif ? `<div class="center">NIF: ${settings.nif}</div>` : ''}
             ${settings?.address ? `<div class="center" style="font-size: 11px;">${settings.address}</div>` : ''}
             ${settings?.phone ? `<div class="center">Tel: ${settings.phone}</div>` : ''}

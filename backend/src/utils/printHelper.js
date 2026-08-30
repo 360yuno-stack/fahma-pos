@@ -230,21 +230,25 @@ async function printOrderReceipt(order, passedPrinters = null) {
       const ESC = '\x1b';
       const GS = '\x1d';
       
+      const removeAccents = (str) => {
+        if (!str) return '';
+        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      };
+
       let data = '';
       data += ESC + '@'; // Inicializar
-      data += '\x1c\x70\x01\x00'; // Imprimir logo pre-almacenado en memoria NV (FS p 1 0)
       data += ESC + 'a' + '\x01'; // Centrar
       
       // Encabezado Premium con formato de texto limpio
       data += ESC + 'E' + '\x01'; // Negrita ON
       data += ESC + '!' + '\x38'; // Doble alto, doble ancho
-      data += `${(settings.restaurantName || 'EL FOGÓN DEL ÁGUILA').toUpperCase()}\n`;
+      data += `${removeAccents(settings.restaurantName || 'EL FOGON DEL AGUILA').toUpperCase()}\n`;
       data += ESC + '!' + '\x00'; // Normal
       data += ESC + 'E' + '\x00'; // Negrita OFF
       
-      if (settings.address) data += `${settings.address}\n`;
-      if (settings.nif) data += `NIF: ${settings.nif}\n`;
-      if (settings.phone) data += `Tlf: ${settings.phone}\n`;
+      if (settings.address) data += `${removeAccents(settings.address)}\n`;
+      if (settings.nif) data += `NIF: ${removeAccents(settings.nif)}\n`;
+      if (settings.phone) data += `Tlf: ${removeAccents(settings.phone)}\n`;
       data += '------------------------------------------\n'; // 42 guiones
       
       // Detalles del Ticket / Factura Simplificada
@@ -253,11 +257,11 @@ async function printOrderReceipt(order, passedPrinters = null) {
       data += `Fecha: ${new Date(order.paidAt || order.createdAt).toLocaleString()}\n`;
       if (order.table) {
         const mesaName = order.table.name || `Mesa ${order.table.number}`;
-        data += `Mesa: ${mesaName}\n`;
+        data += `Mesa: ${removeAccents(mesaName)}\n`;
       }
       if (order.customer && order.customer.name) {
-        data += `Cliente: ${order.customer.name}\n`;
-        if (order.customer.phone) data += `Tlf: ${order.customer.phone}\n`;
+        data += `Cliente: ${removeAccents(order.customer.name)}\n`;
+        if (order.customer.phone) data += `Tlf: ${removeAccents(order.customer.phone)}\n`;
       }
       data += '------------------------------------------\n';
       
@@ -268,7 +272,7 @@ async function printOrderReceipt(order, passedPrinters = null) {
       // Artículos
       for (const item of order.items) {
         const qtyStr = `${item.quantity}x`.padEnd(5, ' ');
-        const conceptStr = item.name.substring(0, 20).padEnd(20, ' ');
+        const conceptStr = removeAccents(item.name).substring(0, 20).padEnd(20, ' ');
         const priceStr = item.price.toFixed(2).padStart(8, ' ');
         const subtotalStr = item.subtotal.toFixed(2).padStart(9, ' ');
         
@@ -317,7 +321,7 @@ async function printOrderReceipt(order, passedPrinters = null) {
       
       data += '\n';
       data += ESC + 'a' + '\x01'; // Centrar
-      data += `${settings.ticketFooterText || '¡Muchas gracias por su visita!'}\n`;
+      data += `${removeAccents(settings.ticketFooterText || '¡Muchas gracias por su visita!')}\n`;
       data += 'Fahma POS\n';
       data += '\n\n\n\n';
       data += GS + 'V' + '\x41' + '\x03'; // Corte de papel
