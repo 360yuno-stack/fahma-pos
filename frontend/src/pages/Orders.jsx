@@ -119,7 +119,7 @@ export default function Orders() {
               .border-bottom { border-bottom: 1px dashed #000; }
             </style>
           </head>
-          <body>
+          <body onload="window.print(); window.close();">
             <h2 style="font-size: 16px; text-transform: uppercase; margin-bottom: 2px;">${settings?.restaurantName || 'EL FOGÓN DEL ÁGUILA'}</h2>
             ${settings?.logo ? `
               <div class="center" style="margin: 8px 0;">
@@ -171,10 +171,6 @@ export default function Orders() {
       `);
       printWindow.document.close();
       printWindow.focus();
-      setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-      }, 250);
     }
   };
 

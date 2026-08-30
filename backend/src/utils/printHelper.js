@@ -1,6 +1,7 @@
 const net = require('net');
 const fs = require('fs');
 const Printer = require('../models/Printer');
+const Settings = require('../models/Settings');
 
 async function printOrderComanda(order, passedPrinters = null) {
   if (process.env.IS_CLOUD_SERVER === 'true' || process.env.RENDER === 'true') {
@@ -195,6 +196,14 @@ async function printOrderReceipt(order, passedPrinters = null) {
   }
 
   try {
+    // Obtener configuración del restaurante
+    let settings = {};
+    try {
+      settings = await Settings.findOne() || {};
+    } catch (e) {
+      console.error('Error al cargar configuración para imprimir:', e.message);
+    }
+
     // 1. Obtener impresoras de facturación activas (pasadas por socket o de BD)
     let printers = passedPrinters;
     if (!printers || printers.length === 0) {
@@ -223,20 +232,19 @@ async function printOrderReceipt(order, passedPrinters = null) {
       
       let data = '';
       data += ESC + '@'; // Inicializar
+      data += '\x1c\x70\x01\x00'; // Imprimir logo pre-almacenado en memoria NV (FS p 1 0)
       data += ESC + 'a' + '\x01'; // Centrar
       
       // Encabezado Premium con formato de texto limpio
       data += ESC + 'E' + '\x01'; // Negrita ON
       data += ESC + '!' + '\x38'; // Doble alto, doble ancho
-      data += 'EL FOGON\n';
-      data += 'DEL AGUILA\n';
+      data += `${(settings.restaurantName || 'EL FOGÓN DEL ÁGUILA').toUpperCase()}\n`;
       data += ESC + '!' + '\x00'; // Normal
       data += ESC + 'E' + '\x00'; // Negrita OFF
       
-      data += 'RESTAURANTE / BAR\n';
-      data += 'NIF: B-12345678\n';
-      data += 'Tlf: 956 00 00 00\n';
-      data += 'C/ Principal, Jerez de la Frontera\n';
+      if (settings.address) data += `${settings.address}\n`;
+      if (settings.nif) data += `NIF: ${settings.nif}\n`;
+      if (settings.phone) data += `Tlf: ${settings.phone}\n`;
       data += '------------------------------------------\n'; // 42 guiones
       
       // Detalles del Ticket / Factura Simplificada
@@ -309,7 +317,7 @@ async function printOrderReceipt(order, passedPrinters = null) {
       
       data += '\n';
       data += ESC + 'a' + '\x01'; // Centrar
-      data += '¡Muchas gracias por su visita!\n';
+      data += `${settings.ticketFooterText || '¡Muchas gracias por su visita!'}\n`;
       data += 'Fahma POS\n';
       data += '\n\n\n\n';
       data += GS + 'V' + '\x41' + '\x03'; // Corte de papel
