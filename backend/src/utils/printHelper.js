@@ -67,6 +67,11 @@ async function printOrderComanda(order, passedPrinters = null) {
         const ESC = '\x1b';
         const GS = '\x1d';
         
+        const removeAccents = (str) => {
+          if (!str) return '';
+          return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        };
+
         let data = '';
         data += ESC + '@'; // Inicializar
         
@@ -74,10 +79,10 @@ async function printOrderComanda(order, passedPrinters = null) {
         data += ESC + 'a' + '\x01'; // Centrar
         data += GS + '!' + '\x11'; // Doble alto, doble ancho (2x)
         data += ESC + 'E' + '\x01'; // Negrita ON
-        data += `COMANDA: ${name.toUpperCase()}\n\n`;
+        data += `COMANDA: ${removeAccents(name).toUpperCase()}\n\n`;
         
         const mesaName = order.table ? (order.table.name || `MESA ${order.table.number}`) : 'PARA LLEVAR';
-        data += `${mesaName.toUpperCase()}\n`;
+        data += `${removeAccents(mesaName).toUpperCase()}\n`;
         
         data += GS + '!' + '\x01'; // Doble alto, ancho normal
         data += `PEDIDO #: ${order.orderNumber}\n`;
@@ -91,16 +96,20 @@ async function printOrderComanda(order, passedPrinters = null) {
           // Cantidad y Nombre en Grande y Negrita
           data += GS + '!' + '\x11'; // Doble alto, doble ancho (2x)
           data += ESC + 'E' + '\x01'; // Negrita ON
-          data += `${item.quantity}x ${item.name.toUpperCase()}\n`;
+          data += `${item.quantity}x ${removeAccents(item.name).toUpperCase()}\n`;
           data += GS + '!' + '\x00'; // Normal
           data += ESC + 'E' + '\x00'; // Negrita OFF
           
-          // Modificadores y Notas de producto en tamaño normal
+          // Modificadores (ej: la 1/2 ración elegida) destacados
           if (item.modifiers && item.modifiers.length > 0) {
-            data += `   * MOD: ${item.modifiers.join(', ')}\n`;
+            data += GS + '!' + '\x01'; // Doble alto
+            data += ESC + 'E' + '\x01'; // Negrita ON
+            data += `   --> ${removeAccents(item.modifiers.join(', ')).toUpperCase()}\n`;
+            data += GS + '!' + '\x00'; // Normal
+            data += ESC + 'E' + '\x00'; // Negrita OFF
           }
           if (item.notes) {
-            data += `   * NOTA: ${item.notes}\n`;
+            data += `   * NOTA: ${removeAccents(item.notes)}\n`;
           }
           data += '\n'; // Separación entre platos
         }
@@ -112,7 +121,7 @@ async function printOrderComanda(order, passedPrinters = null) {
           data += ESC + 'E' + '\x01'; // Negrita ON
           data += 'ANOTACIONES GENERALES:\n';
           data += GS + '!' + '\x11'; // Doble alto y doble ancho para la nota importante
-          data += `${order.notes.toUpperCase()}\n`;
+          data += `${removeAccents(order.notes).toUpperCase()}\n`;
           data += GS + '!' + '\x00'; // Normal
           data += ESC + 'E' + '\x00'; // Negrita OFF
         }

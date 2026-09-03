@@ -367,7 +367,8 @@ export default function TPV() {
           name: l.name,
           price: l.price,
           quantity: l.qty,
-          subtotal: l.price * l.qty
+          subtotal: l.price * l.qty,
+          modifiers: l.modifiers || []
         })),
         subtotal,
         tax: iva,
