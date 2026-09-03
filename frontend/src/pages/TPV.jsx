@@ -170,9 +170,43 @@ export default function TPV() {
 
   // Add product to ticket
   function addToTicket(product) {
-    const productId = product._id || product.id;
-    const productName = product.name || product.nombre || 'Producto';
-    const productPrice = product.price ?? product.precio ?? 0;
+    const addDirectProduct = (prod) => {
+      const pId = prod._id || prod.id;
+      const pName = prod.name || prod.nombre || 'Producto';
+      const pPrice = prod.price ?? prod.precio ?? 0;
+
+      const prodModifiers = modifiers.filter(m => m.products && m.products.includes(pId));
+      if (prodModifiers.length > 0) {
+        setModifiersProduct(prod);
+        setApplicableModifiers(prodModifiers);
+        const initialSelections = {};
+        prodModifiers.forEach(m => {
+          initialSelections[m._id] = m.isRequired && m.options.length > 0 ? [m.options[0].name] : [];
+        });
+        setSelectedModifierOptions(initialSelections);
+        setIsModifiersModalOpen(true);
+        return;
+      }
+
+      setTicketLines(prev => {
+        const existing = prev.find(l => l.productId === pId && (!l.modifiers || l.modifiers.length === 0));
+        if (existing) {
+          return prev.map(l =>
+            (l.productId === pId && (!l.modifiers || l.modifiers.length === 0)) ? { ...l, qty: l.qty + 1 } : l
+          );
+        }
+        return [...prev, {
+          productId: pId,
+          name: pName,
+          price: pPrice,
+          qty: 1,
+          modifiers: []
+        }];
+      });
+
+      setAddedProductId(pId);
+      setTimeout(() => setAddedProductId(null), 300);
+    };
 
     // Detectar si es un cubo
     const productCategory = categories.find(c => {
@@ -180,78 +214,67 @@ export default function TPV() {
       const cId = c._id || c.id;
       return pCatId && cId && pCatId.toString() === cId.toString();
     });
+    const productName = product.name || product.nombre || '';
     const isCubo = (productCategory && (productCategory.name || productCategory.nombre || '').toLowerCase().includes('cubo')) ||
                   productName.toLowerCase().includes('cubo');
 
     if (isCubo) {
-      // Buscar la categoría "1/2 Ración"
       const halfPortionCategory = categories.find(c => {
         const cName = (c.name || c.nombre || '').toLowerCase();
         return cName.includes('1/2 ración') || cName.includes('1/2 racion') || cName.includes('media racion') || cName.includes('medias raciones');
       });
 
       if (halfPortionCategory) {
-        const targetCatId = halfPortionCategory._id || halfPortionCategory.id;
-        const halfPortionProducts = allProducts.filter(p => {
+        const targetCatId = (halfPortionCategory._id || halfPortionCategory.id).toString();
+
+        const openHalfPortionModal = (hpProducts) => {
+          if (hpProducts && hpProducts.length > 0) {
+            const virtualModifier = {
+              _id: 'virtual-half-portion',
+              name: 'Elige tu 1/2 Ración',
+              isRequired: true,
+              multiple: false,
+              options: hpProducts.map(p => ({
+                name: p.name || p.nombre,
+                price: 0
+              }))
+            };
+
+            setModifiersProduct(product);
+            setApplicableModifiers([virtualModifier]);
+            setSelectedModifierOptions({
+              'virtual-half-portion': [virtualModifier.options[0].name]
+            });
+            setIsModifiersModalOpen(true);
+            return true;
+          }
+          return false;
+        };
+
+        const inMemoryHP = allProducts.filter(p => {
           const pCatId = p.category?._id || p.category?.id || p.category;
-          return pCatId && targetCatId && pCatId.toString() === targetCatId.toString();
+          return pCatId && pCatId.toString() === targetCatId;
         });
 
-        if (halfPortionProducts.length > 0) {
-          const virtualModifier = {
-            _id: 'virtual-half-portion',
-            name: 'Elige tu 1/2 Ración',
-            isRequired: true,
-            multiple: false,
-            options: halfPortionProducts.map(p => ({
-              name: p.name || p.nombre,
-              price: 0
-            }))
-          };
-
-          setModifiersProduct(product);
-          setApplicableModifiers([virtualModifier]);
-          setSelectedModifierOptions({
-            'virtual-half-portion': [virtualModifier.options[0].name]
-          });
-          setIsModifiersModalOpen(true);
+        if (openHalfPortionModal(inMemoryHP)) {
           return;
         }
+
+        // Si no está en memoria, consultar directamente a la API
+        productsAPI.getAll({ category: targetCatId }).then(res => {
+          const list = Array.isArray(res.data) ? res.data : (res.data?.data || res.data?.products || []);
+          if (!openHalfPortionModal(list)) {
+            addDirectProduct(product);
+          }
+        }).catch(err => {
+          console.error('Error al cargar 1/2 raciones:', err);
+          addDirectProduct(product);
+        });
+        return;
       }
     }
 
-    const prodModifiers = modifiers.filter(m => m.products && m.products.includes(productId));
-    if (prodModifiers.length > 0) {
-      setModifiersProduct(product);
-      setApplicableModifiers(prodModifiers);
-      const initialSelections = {};
-      prodModifiers.forEach(m => {
-        initialSelections[m._id] = m.isRequired && m.options.length > 0 ? [m.options[0].name] : [];
-      });
-      setSelectedModifierOptions(initialSelections);
-      setIsModifiersModalOpen(true);
-      return;
-    }
-
-    setTicketLines(prev => {
-      const existing = prev.find(l => l.productId === productId && (!l.modifiers || l.modifiers.length === 0));
-      if (existing) {
-        return prev.map(l =>
-          (l.productId === productId && (!l.modifiers || l.modifiers.length === 0)) ? { ...l, qty: l.qty + 1 } : l
-        );
-      }
-      return [...prev, {
-        productId,
-        name: productName,
-        price: productPrice,
-        qty: 1,
-        modifiers: []
-      }];
-    });
-
-    // Trigger animation
-    setAddedProductId(productId);
-    setTimeout(() => setAddedProductId(null), 300);
+    addDirectProduct(product);
   }
 
   function addProductWithModifiers() {
