@@ -252,14 +252,20 @@ router.put('/:id', async (req, res) => {
     if (!order) return res.status(404).json({ success: false, message: 'Pedido no encontrado' });
 
     if (items || lines) {
-      const orderItems = items || (lines || []).map(l => ({
-        product: l.productId || l.product,
-        name: l.nombre || l.name,
-        quantity: l.qty || l.quantity || 1,
-        price: l.precio || l.price,
-        subtotal: (l.precio || l.price) * (l.qty || l.quantity || 1),
-        modifiers: l.modifiers || []
-      }));
+      const rawList = items || lines || [];
+      const orderItems = rawList.map(l => {
+        const qty = l.qty || l.quantity || 1;
+        const price = l.precio ?? l.price ?? 0;
+        const subtotal = l.subtotal !== undefined ? l.subtotal : (price * qty);
+        return {
+          product: l.productId || l.product,
+          name: l.nombre || l.name || 'Producto',
+          quantity: qty,
+          price: price,
+          subtotal: subtotal,
+          modifiers: l.modifiers || []
+        };
+      });
       order.items = orderItems;
     }
 

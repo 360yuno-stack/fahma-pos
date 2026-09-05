@@ -414,7 +414,14 @@ export default function Orders() {
       setSavingEdit(true);
       const computedTotal = editForm.items.reduce((s, i) => s + (i.price * i.quantity), 0);
       const payload = {
-        items: editForm.items,
+        items: editForm.items.map(i => ({
+          product: i.product,
+          name: i.name,
+          price: i.price,
+          quantity: i.quantity,
+          subtotal: (i.price || 0) * (i.quantity || 1),
+          modifiers: i.modifiers || []
+        })),
         total: computedTotal,
         paymentMethod: editForm.paymentMethod,
         notes: editForm.notes,
