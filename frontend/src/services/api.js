@@ -57,7 +57,9 @@ export const ordersAPI = {
   getAll: (params) => api.get('/orders', { params }),
   getById: (id) => api.get(`/orders/${id}`),
   create: (data) => api.post('/orders', data),
+  update: (id, data) => api.put(`/orders/${id}`, data),
   updateStatus: (id, data) => api.patch(`/orders/${id}/status`, data),
+  emailInvoice: (id, data) => api.post(`/orders/${id}/email-invoice`, data),
   delete: (id) => api.delete(`/orders/${id}`),
 };
 

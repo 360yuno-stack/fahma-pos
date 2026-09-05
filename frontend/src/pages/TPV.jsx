@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import api, { categoriesAPI, productsAPI, ordersAPI, tablesAPI } from '../services/api';
+import api, { categoriesAPI, productsAPI, ordersAPI, tablesAPI, clientsAPI } from '../services/api';
 import './TPV.css';
 
 const IVA_RATE = 0.10;
@@ -59,6 +59,70 @@ export default function TPV() {
   const [modifiersProduct, setModifiersProduct] = useState(null);
   const [applicableModifiers, setApplicableModifiers] = useState([]);
   const [selectedModifierOptions, setSelectedModifierOptions] = useState({});
+
+  // Customer / Client states
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [clientsList, setClientsList] = useState([]);
+  const [customerForm, setCustomerForm] = useState({
+    client: '',
+    name: '',
+    nif: '',
+    email: '',
+    phone: '',
+    address: ''
+  });
+
+  const openCustomerModal = async () => {
+    try {
+      const res = await clientsAPI.getAll();
+      setClientsList(Array.isArray(res.data) ? res.data : (res.data?.data || []));
+    } catch (e) {
+      console.error('Error loading clients:', e);
+    }
+    if (selectedCustomer) {
+      setCustomerForm({
+        client: selectedCustomer.client || selectedCustomer._id || '',
+        name: selectedCustomer.name || '',
+        nif: selectedCustomer.nif || selectedCustomer.dni_cif || '',
+        email: selectedCustomer.email || '',
+        phone: selectedCustomer.phone || '',
+        address: selectedCustomer.address || ''
+      });
+    } else {
+      setCustomerForm({ client: '', name: '', nif: '', email: '', phone: '', address: '' });
+    }
+    setShowCustomerModal(true);
+  };
+
+  const handleSelectExistingClient = (clientId) => {
+    if (!clientId) {
+      setCustomerForm({ client: '', name: '', nif: '', email: '', phone: '', address: '' });
+      return;
+    }
+    const found = clientsList.find(c => (c._id || c.id) === clientId);
+    if (found) {
+      setCustomerForm({
+        client: found._id || found.id,
+        name: found.name || '',
+        nif: found.dni_cif || found.nif || '',
+        email: found.email || '',
+        phone: found.phone || '',
+        address: found.address || ''
+      });
+    }
+  };
+
+  const handleSaveCustomer = (e) => {
+    e.preventDefault();
+    if (!customerForm.name.trim()) {
+      addToast('Indica al menos el nombre del cliente', 'warning');
+      return;
+    }
+    setSelectedCustomer({ ...customerForm });
+    setShowCustomerModal(false);
+    addToast(`Cliente ${customerForm.name} asociado al ticket`, 'success');
+  };
 
   const openQuickEdit = (product) => {
     setQuickEditProduct(product);
@@ -376,7 +440,8 @@ export default function TPV() {
         paymentMethod: paymentMethod === 'cash' ? 'efectivo' : 'tarjeta',
         tableId: selectedTableId || undefined,
         status: 'completed',
-        notes
+        notes,
+        customer: selectedCustomer || undefined
       };
 
       await ordersAPI.create(orderData);
@@ -812,6 +877,39 @@ export default function TPV() {
               onChange={e => setNotes(e.target.value)}
             />
           </div>
+
+          {/* Cliente Button */}
+          <div style={{ marginBottom: '10px' }}>
+            <button
+              type="button"
+              className="btn"
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justify: 'space-between',
+                padding: '8px 12px',
+                fontSize: '13px',
+                borderRadius: '6px',
+                background: selectedCustomer ? '#e0f2fe' : 'var(--color-bg)',
+                color: selectedCustomer ? '#0369a1' : 'var(--color-text)',
+                border: selectedCustomer ? '1px solid #7dd3fc' : '1px solid var(--color-border)',
+                fontWeight: selectedCustomer ? '600' : '500'
+              }}
+              onClick={openCustomerModal}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span className="mdi mdi-account-card-details" />
+                {selectedCustomer ? `Cliente: ${selectedCustomer.name}` : 'Asociar Cliente / Factura'}
+              </span>
+              {selectedCustomer ? (
+                <span className="mdi mdi-pencil" style={{ fontSize: '14px' }} />
+              ) : (
+                <span className="mdi mdi-plus" style={{ fontSize: '14px' }} />
+              )}
+            </button>
+          </div>
+
           {/* Summary */}
           <div className="tpv-ticket-summary">
             <div className="tpv-ticket-summary-row">
@@ -966,6 +1064,104 @@ export default function TPV() {
                 Aceptar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Customer / Factura Modal */}
+      {showCustomerModal && (
+        <div className="modal-overlay" style={{ zIndex: 1002 }} onClick={() => setShowCustomerModal(false)}>
+          <div className="modal-container" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2><span className="mdi mdi-account-card-details" style={{ marginRight: 8 }} />Asociar Cliente a la Factura</h2>
+              <button className="modal-close-btn mdi mdi-close" onClick={() => setShowCustomerModal(false)} />
+            </div>
+            <form onSubmit={handleSaveCustomer}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '16px' }}>
+                <div className="form-group">
+                  <label className="form-label">Cargar de la lista de Clientes</label>
+                  <select
+                    className="form-select"
+                    value={customerForm.client}
+                    onChange={(e) => handleSelectExistingClient(e.target.value)}
+                  >
+                    <option value="">-- O ingresar datos manualmente --</option>
+                    {clientsList.map(c => (
+                      <option key={c._id || c.id} value={c._id || c.id}>
+                        {c.name} {c.dni_cif ? `(${c.dni_cif})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Nombre / Razón Social *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={customerForm.name}
+                    onChange={(e) => setCustomerForm({ ...customerForm, name: e.target.value })}
+                    placeholder="Ej: Juan Pérez o Empresa S.L."
+                    required
+                  />
+                </div>
+
+                <div className="form-row" style={{ display: 'flex', gap: '12px' }}>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label className="form-label">NIF / CIF / DNI</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={customerForm.nif}
+                      onChange={(e) => setCustomerForm({ ...customerForm, nif: e.target.value })}
+                      placeholder="Ej: 12345678X"
+                    />
+                  </div>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label className="form-label">Teléfono</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={customerForm.phone}
+                      onChange={(e) => setCustomerForm({ ...customerForm, phone: e.target.value })}
+                      placeholder="Ej: 600000000"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Email (para envío de Factura)</label>
+                  <input
+                    type="email"
+                    className="form-input"
+                    value={customerForm.email}
+                    onChange={(e) => setCustomerForm({ ...customerForm, email: e.target.value })}
+                    placeholder="ejemplo@correo.com"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Dirección Completa</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={customerForm.address}
+                    onChange={(e) => setCustomerForm({ ...customerForm, address: e.target.value })}
+                    placeholder="C/ Principal 123, Ciudad"
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ display: 'flex', justifyContent: 'space-between', padding: '16px' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => { setSelectedCustomer(null); setShowCustomerModal(false); }}>
+                  Desasociar
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  <span className="mdi mdi-check" style={{ marginRight: 6 }} />
+                  Asociar al Ticket
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

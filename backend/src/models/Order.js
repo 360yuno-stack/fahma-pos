@@ -55,8 +55,12 @@ const orderSchema = new mongoose.Schema({
     default: null
   },
   customer: {
+    client: { type: mongoose.Schema.Types.ObjectId, ref: 'Client', default: null },
     name: { type: String, default: '' },
-    phone: { type: String, default: '' }
+    nif: { type: String, default: '' },
+    email: { type: String, default: '' },
+    phone: { type: String, default: '' },
+    address: { type: String, default: '' }
   },
   notes: { type: String, default: '' },
   paidAt: { type: Date, default: null }
