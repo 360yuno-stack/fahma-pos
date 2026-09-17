@@ -54,10 +54,11 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/invoices - Subir factura
-router.post('/', upload.single('file'), async (req, res) => {
+// POST /api/invoices - Subir una o varias facturas
+router.post('/', upload.any(), async (req, res) => {
   try {
-    if (!req.file) {
+    const uploadedFiles = req.files || [];
+    if (!uploadedFiles || uploadedFiles.length === 0) {
       return res.status(400).json({ success: false, message: 'No se ha subido ningún archivo' });
     }
 
@@ -66,21 +67,28 @@ router.post('/', upload.single('file'), async (req, res) => {
       return res.status(400).json({ success: false, message: 'Año y trimestre son obligatorios' });
     }
 
-    const invoice = new Invoice({
-      filename: req.file.originalname,
-      filepath: `/uploads/invoices/${req.file.filename}`,
-      quarter: parseInt(quarter),
-      year: parseInt(year),
-      notes: notes || '',
-      uploadedBy: req.user ? req.user.id : null
-    });
+    const savedInvoices = [];
+    for (const fileItem of uploadedFiles) {
+      const invoice = new Invoice({
+        filename: fileItem.originalname,
+        filepath: `/uploads/invoices/${fileItem.filename}`,
+        quarter: parseInt(quarter),
+        year: parseInt(year),
+        notes: notes || '',
+        uploadedBy: req.user ? req.user.id : null
+      });
+      const saved = await invoice.save();
+      savedInvoices.push(saved);
+    }
 
-    const saved = await invoice.save();
     res.status(201).json({
       success: true,
-      data: saved
+      count: savedInvoices.length,
+      data: savedInvoices,
+      message: `Se han subido y procesado ${savedInvoices.length} facturas correctamente`
     });
   } catch (err) {
+    console.error('Error POST /api/invoices:', err);
     res.status(500).json({ success: false, message: err.message });
   }
 });

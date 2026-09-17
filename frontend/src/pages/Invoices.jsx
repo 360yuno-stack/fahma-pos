@@ -11,7 +11,7 @@ export default function Invoices() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedQuarter, setSelectedQuarter] = useState(Math.floor((new Date().getMonth() + 3) / 3));
   const [notes, setNotes] = useState('');
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
 
   // Generar años desde 2024 hasta 2030
   const years = [2024, 2025, 2026, 2027, 2028, 2029, 2030];
@@ -39,33 +39,38 @@ export default function Invoices() {
   }, [selectedYear, selectedQuarter]);
 
   const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+    if (e.target.files && e.target.files.length > 0) {
+      setFiles(Array.from(e.target.files));
     }
   };
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!file) {
-      addToast('Por favor, selecciona un archivo', 'warning');
+    if (files.length === 0) {
+      addToast('Por favor, selecciona al menos un archivo', 'warning');
       return;
     }
 
     const formData = new FormData();
-    formData.append('file', file);
+    files.forEach((f) => {
+      formData.append('files', f);
+    });
     formData.append('quarter', selectedQuarter);
     formData.append('year', selectedYear);
     formData.append('notes', notes);
 
     setUploading(true);
     try {
-      await invoicesAPI.upload(formData);
-      addToast('Factura subida correctamente', 'success');
-      setFile(null);
+      const res = await invoicesAPI.upload(formData);
+      const msg = res.data?.message || (files.length > 1 
+        ? `${files.length} facturas subidas correctamente` 
+        : 'Factura subida correctamente');
+      addToast(msg, 'success');
+      setFiles([]);
       setNotes('');
       fetchInvoices();
     } catch (err) {
-      addToast(err.response?.data?.message || 'Error al subir la factura', 'error');
+      addToast(err.response?.data?.message || 'Error al subir las facturas', 'error');
     } finally {
       setUploading(false);
     }
@@ -131,10 +136,33 @@ export default function Invoices() {
               <label className="file-drop-zone">
                 <span className="mdi mdi-cloud-upload-outline upload-icon"></span>
                 <span className="upload-text">
-                  {file ? file.name : 'Arrastra o haz clic para seleccionar factura (PDF, Imagen, Excel)'}
+                  {files.length === 0 ? (
+                    'Arrastra o haz clic para seleccionar archivos e imágenes (puedes seleccionar varias a la vez)'
+                  ) : files.length === 1 ? (
+                    files[0].name
+                  ) : (
+                    `📄 ${files.length} archivos seleccionados`
+                  )}
                 </span>
-                <input type="file" onChange={handleFileChange} accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls,.csv" />
+                <input 
+                  type="file" 
+                  multiple 
+                  onChange={handleFileChange} 
+                  accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls,.csv" 
+                />
               </label>
+              {files.length > 0 && (
+                <div className="selected-files-list" style={{ marginTop: '10px', fontSize: '0.85rem' }}>
+                  <strong>Archivos seleccionados ({files.length}):</strong>
+                  <ul style={{ margin: '4px 0 0 18px', padding: 0, maxHeight: '120px', overflowY: 'auto' }}>
+                    {files.map((f, idx) => (
+                      <li key={idx}>
+                        {f.name} <span style={{ opacity: 0.7 }}>({(f.size / 1024).toFixed(1)} KB)</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             <div className="form-group">
@@ -150,10 +178,10 @@ export default function Invoices() {
             <button type="submit" className="btn btn-primary w-full" disabled={uploading}>
               {uploading ? (
                 <>
-                  <span className="spinner-border" /> Subiendo factura...
+                  <span className="spinner-border" /> Subiendo {files.length} {files.length === 1 ? 'archivo' : 'archivos'}...
                 </>
               ) : (
-                'Subir a la Nube'
+                files.length > 1 ? `Subir ${files.length} Facturas a la Nube` : 'Subir a la Nube'
               )}
             </button>
           </form>
