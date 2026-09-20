@@ -562,8 +562,9 @@
   {
     "code": "P0000022",
     "name": "MONSTER",
-    "category": "ENERGIZANTES",
-    "price": 2,
+    "category": "REFRESCOS",
+    "price": 2.5,
+    "image": "/refrescos/monster.jpg",
     "hasModifiers": false
   },
   {
@@ -667,8 +668,9 @@
   {
     "code": "P0000023",
     "name": "RED BULL",
-    "category": "ENERGIZANTES",
+    "category": "REFRESCOS",
     "price": 2.5,
+    "image": "/refrescos/redbull.jpg",
     "hasModifiers": false
   },
   {
