@@ -18,7 +18,10 @@ exports.login = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ username }).select('+password');
+    const cleanUsername = username.trim();
+    const user = await User.findOne({ 
+      username: { $regex: new RegExp('^' + cleanUsername + '$', 'i') } 
+    }).select('+password');
     if (!user) {
       return res.status(401).json({ 
         success: false, 
