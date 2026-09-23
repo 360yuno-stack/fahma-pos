@@ -27,7 +27,12 @@ router.post('/', async (req, res) => {
 // PUT /api/users/:id
 router.put('/:id', async (req, res) => {
   try {
-    if (req.body.password === '') delete req.body.password;
+    if (req.body.password === '') {
+      delete req.body.password;
+    } else if (req.body.password) {
+      const bcrypt = require('bcryptjs');
+      req.body.password = await bcrypt.hash(req.body.password, 10);
+    }
     const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true }).select('-password');
     if (!user) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: user });

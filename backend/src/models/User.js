@@ -50,6 +50,16 @@ userSchema.pre('save', async function(next) {
 
 // Método para comparar passwords
 userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!this.password) return false;
+  // Fallback si la contraseña no está encriptada con bcrypt
+  if (!this.password.startsWith('$2')) {
+    const matches = candidatePassword === this.password;
+    if (matches) {
+      this.password = candidatePassword; // Triggers pre('save') hash
+      await this.save();
+    }
+    return matches;
+  }
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
