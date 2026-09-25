@@ -40,7 +40,13 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Static files
-app.use('/uploads', express.static('uploads'));
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+app.use('/uploads', express.static(path.join(process.cwd(), 'backend/uploads')));
+
+// Favicon handler to avoid 404 console log
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 // Routes
 app.use('/api/auth', require('./src/routes/authRoutes'));

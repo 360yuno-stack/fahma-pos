@@ -23,6 +23,14 @@ const invoiceSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  mimeType: {
+    type: String,
+    default: ''
+  },
+  fileData: {
+    type: String,
+    default: ''
+  },
   uploadedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

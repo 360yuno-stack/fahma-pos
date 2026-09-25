@@ -87,13 +87,10 @@ export default function Invoices() {
     }
   };
 
-  const getBackendUrl = (filepath) => {
+  const getInvoiceFileUrl = (invoiceId, download = false) => {
     const envUrl = import.meta.env.VITE_API_URL;
-    if (envUrl) {
-      const root = envUrl.replace(/\/api\/?$/, '');
-      return `${root}${filepath}`;
-    }
-    return `http://${window.location.hostname}:5000${filepath}`;
+    const baseUrl = envUrl ? envUrl.replace(/\/api\/?$/, '') : `http://${window.location.hostname}:5000`;
+    return `${baseUrl}/api/invoices/${invoiceId}/file${download ? '?download=true' : ''}`;
   };
 
   const getFileIcon = (filename) => {
@@ -235,7 +232,16 @@ export default function Invoices() {
                       <td className="text-right">
                         <div className="action-buttons">
                           <a 
-                            href={getBackendUrl(invoice.filepath)} 
+                            href={getInvoiceFileUrl(invoice._id, false)} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="btn btn-icon btn-outline-primary" 
+                            title="Ver Factura"
+                          >
+                            <span className="mdi mdi-eye-outline"></span>
+                          </a>
+                          <a 
+                            href={getInvoiceFileUrl(invoice._id, true)} 
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="btn btn-icon btn-outline-success" 
