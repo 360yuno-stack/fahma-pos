@@ -723,7 +723,7 @@ export default function TPV() {
           ) : (
             filteredProducts.map(product => {
               const prodId = product._id || product.id;
-              const prodName = product.name || product.nombre || 'Producto';
+              const prodName = (product.name || product.nombre || 'Producto').toUpperCase();
               const prodPrice = product.price ?? product.precio ?? 0;
               const catColor = product.category?.color || product.categoryColor || '#1976D2';
               const hasImage = !!product.image;
@@ -732,46 +732,44 @@ export default function TPV() {
                 <div
                   key={prodId}
                   className={`tpv-product-card ${addedProductId === prodId ? 'tpv-product-card--added' : ''} ${hasImage ? 'tpv-product-card--has-image' : ''}`}
-                  style={hasImage ? {
-                    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.75)), url(${product.image})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    color: '#ffffff'
-                  } : {}}
                   onClick={() => addToTicket(product)}
                 >
                   <div className="tpv-product-color-strip" style={{ backgroundColor: catColor }} />
-                  <div className="tpv-product-name" style={hasImage ? { color: '#ffffff', textShadow: '0 1px 3px rgba(0,0,0,0.9)' } : {}}>{prodName}</div>
-                  <div className="tpv-product-footer-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', zIndex: 1 }}>
-                    <div className="tpv-product-price" style={hasImage ? { color: '#81d4fa', textShadow: '0 1px 2px rgba(0,0,0,0.9)', margin: 0, fontWeight: '700' } : { margin: 0 }}>{formatCurrency(prodPrice)}</div>
-                    <button 
-                      className="tpv-quick-edit-btn no-print" 
-                      style={{ 
-                        background: hasImage ? 'rgba(255, 255, 255, 0.25)' : 'var(--color-bg)', 
-                        border: hasImage ? '1px solid rgba(255, 255, 255, 0.4)' : '1px solid var(--color-border)', 
-                        borderRadius: '6px', 
-                        width: '26px', 
-                        height: '26px', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        margin: 0
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openQuickEdit(product);
-                      }}
-                    >
-                      <span className="mdi mdi-pencil-outline" style={{ fontSize: '13px', color: hasImage ? '#ffffff' : 'var(--color-text-secondary)' }} />
-                    </button>
-                  </div>
-                  {product.category?.name && (
-                    <div className="tpv-product-category" style={hasImage ? { fontSize: '11px', color: 'rgba(255,255,255,0.75)', marginTop: '2px', zIndex: 1 } : { fontSize: '11px', opacity: 0.8, marginTop: '2px' }}>
-                      {product.category.name || product.category.nombre}
+                  
+                  {hasImage && (
+                    <div className="tpv-product-image-wrapper">
+                      <img 
+                        src={product.image} 
+                        alt={prodName} 
+                        className="tpv-product-image" 
+                        loading="lazy" 
+                      />
                     </div>
                   )}
+
+                  <div className="tpv-product-content">
+                    <div className="tpv-product-name">{prodName}</div>
+                    
+                    <div className="tpv-product-footer-row">
+                      <div className="tpv-product-price">{formatCurrency(prodPrice)}</div>
+                      <button 
+                        className="tpv-quick-edit-btn no-print" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openQuickEdit(product);
+                        }}
+                        title="Editar precio/nombre"
+                      >
+                        <span className="mdi mdi-pencil-outline" />
+                      </button>
+                    </div>
+
+                    {product.category?.name && (
+                      <div className="tpv-product-category">
+                        {(product.category.name || product.category.nombre).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })

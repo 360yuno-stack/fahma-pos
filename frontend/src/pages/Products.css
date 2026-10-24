@@ -8,6 +8,12 @@
   gap: var(--space-sm);
 }
 
+.product-name-cell .product-info span:first-child {
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
 .product-name-cell .product-info .product-desc {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
