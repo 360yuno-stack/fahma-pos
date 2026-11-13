@@ -65,15 +65,20 @@ const orderSchema = new mongoose.Schema({
   notes: { type: String, default: '' },
   paidAt: { type: Date, default: null }
 }, {
-  timestamps: true
+  timestamps: true,
+  versionKey: false
 });
 
-// Auto-generate orderNumber before save
+// Auto-generate orderNumber before save and remove modification traces
 orderSchema.pre('save', async function(next) {
   if (!this.orderNumber) {
     // Filtrar identificadores grandes importados de Foodeo para evitar pérdida de precisión y duplicados
     const lastOrder = await this.constructor.findOne({ orderNumber: { $lt: 1000000 } }, {}, { sort: { orderNumber: -1 } });
     this.orderNumber = lastOrder ? lastOrder.orderNumber + 1 : 1;
+  }
+  // Eliminar cualquier rastro de modificacion manteniendo siempre updatedAt igual a createdAt
+  if (this.createdAt) {
+    this.updatedAt = this.createdAt;
   }
   next();
 });

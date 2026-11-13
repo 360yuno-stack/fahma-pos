@@ -59,6 +59,7 @@ export default function TPV() {
   const [modifiersProduct, setModifiersProduct] = useState(null);
   const [applicableModifiers, setApplicableModifiers] = useState([]);
   const [selectedModifierOptions, setSelectedModifierOptions] = useState({});
+  const [lastChargedOrder, setLastChargedOrder] = useState(null);
 
   // Customer / Client states
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -444,14 +445,36 @@ export default function TPV() {
         customer: selectedCustomer || undefined
       };
 
-      await ordersAPI.create(orderData);
-      addToast(`Pedido cobrado: ${formatCurrency(total)}`, 'success');
+      const res = await ordersAPI.create(orderData);
+      const createdOrder = res.data?.data || res.data;
+      setLastChargedOrder(createdOrder);
+      addToast(`Pedido #${createdOrder.orderNumber || ''} cobrado: ${formatCurrency(total)}`, 'success');
       clearTicket();
     } catch (err) {
       console.error('Error creating order:', err);
       addToast('Error al procesar el pedido', 'error');
     } finally {
       setProcessing(false);
+    }
+  }
+
+  async function handleReprintTicket() {
+    try {
+      let targetOrder = lastChargedOrder;
+      if (!targetOrder) {
+        const res = await ordersAPI.getAll({ limit: 1 });
+        const list = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+        if (list.length > 0) targetOrder = list[0];
+      }
+      if (!targetOrder) {
+        addToast('No hay tickets recientes para reimprimir', 'warning');
+        return;
+      }
+      await api.post(`/orders/${targetOrder._id}/print`, { type: 'receipt' });
+      addToast(`Ticket #${targetOrder.orderNumber || ''} enviado a la impresora`, 'success');
+    } catch (err) {
+      console.warn('Fallo al reimprimir ticket:', err);
+      addToast('Error al enviar ticket a la impresora', 'error');
     }
   }
 
@@ -784,6 +807,16 @@ export default function TPV() {
             <span className="mdi mdi-receipt" />
             Ticket
           </div>
+          <button
+            type="button"
+            className="btn btn-sm btn-secondary no-print"
+            onClick={handleReprintTicket}
+            title="Reimprimir el último ticket cobrado"
+            style={{ fontSize: '12px', padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto', marginRight: '8px' }}
+          >
+            <span className="mdi mdi-printer" />
+            Reimprimir
+          </button>
           <select
             className="tpv-table-selector"
             value={selectedTableId}

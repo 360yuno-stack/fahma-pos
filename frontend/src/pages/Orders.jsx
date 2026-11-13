@@ -315,8 +315,70 @@ export default function Orders() {
     setShowEmailModal(true);
   };
 
+  const generateInvoicePlainText = (order) => {
+    if (!order) return '';
+    const orderNum = getOrderNumber(order);
+    const restaurant = settings?.restaurantName || 'EL FOGÓN DEL ÁGUILA';
+    const nif = settings?.nif ? `NIF: ${settings.nif}` : '';
+    const phone = settings?.phone ? `Tel: ${settings.phone}` : '';
+    const clientName = order.customer?.name || 'Cliente';
+    const clientNif = order.customer?.nif ? `NIF/CIF: ${order.customer.nif}` : '';
+    const clientAddress = order.customer?.address ? `Dirección: ${order.customer.address}` : '';
+    const dateStr = new Date(order.paidAt || order.createdAt).toLocaleDateString('es-ES');
+    const total = (order.total || 0).toFixed(2);
+    const subtotal = (order.subtotal || (order.total / 1.10)).toFixed(2);
+    const taxes = (order.taxes || (order.total - (order.total / 1.10))).toFixed(2);
+
+    const itemsStr = (order.items || []).map(i => 
+      `${i.quantity || 1}x ${i.name || i.product?.name || 'Producto'} (€${(i.price || 0).toFixed(2)}) = €${((i.price || 0) * (i.quantity || 1)).toFixed(2)}`
+    ).join('\n');
+
+    return `FACTURA N° F-${new Date(order.createdAt).getFullYear()}/${orderNum}
+${restaurant} ${nif ? '| ' + nif : ''} ${phone ? '| ' + phone : ''}
+${settings?.address || ''}
+
+FECHA: ${dateStr}
+DATOS DEL CLIENTE:
+Nombre: ${clientName}
+${clientNif ? clientNif + '\n' : ''}${clientAddress ? clientAddress + '\n' : ''}
+DESGLOSE:
+------------------------------------------
+${itemsStr}
+------------------------------------------
+Base Imponible (Sin IVA): €${subtotal}
+IVA (10%): €${taxes}
+TOTAL FACTURA: €${total}
+
+${settings?.ticketFooterText || '¡Muchas gracias por su confianza!'}`;
+  };
+
+  const handleOpenGmail = () => {
+    if (!emailingOrder) return;
+    const orderNum = getOrderNumber(emailingOrder);
+    const subject = encodeURIComponent(`Factura F-${new Date(emailingOrder.createdAt).getFullYear()}/${orderNum} - ${settings?.restaurantName || 'EL FOGÓN DEL ÁGUILA'}`);
+    const body = encodeURIComponent(generateInvoicePlainText(emailingOrder));
+    const to = encodeURIComponent(targetEmail || emailingOrder.customer?.email || '');
+    window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${subject}&body=${body}`, '_blank');
+  };
+
+  const handleOpenMailto = () => {
+    if (!emailingOrder) return;
+    const orderNum = getOrderNumber(emailingOrder);
+    const subject = encodeURIComponent(`Factura F-${new Date(emailingOrder.createdAt).getFullYear()}/${orderNum} - ${settings?.restaurantName || 'EL FOGÓN DEL ÁGUILA'}`);
+    const body = encodeURIComponent(generateInvoicePlainText(emailingOrder));
+    const to = encodeURIComponent(targetEmail || emailingOrder.customer?.email || '');
+    window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+  };
+
+  const handleCopyInvoice = () => {
+    if (!emailingOrder) return;
+    const text = generateInvoicePlainText(emailingOrder);
+    navigator.clipboard.writeText(text);
+    addToast('Factura copiada al portapapeles', 'success');
+  };
+
   const handleSendEmailInvoice = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!targetEmail.trim()) {
       addToast('Indica un correo electrónico válido', 'warning');
       return;
@@ -324,11 +386,23 @@ export default function Orders() {
     try {
       setSendingEmail(true);
       const res = await ordersAPI.emailInvoice(emailingOrder._id, { targetEmail });
+      
+      // Actualizar localmente el pedido para reflejar el correo del cliente
+      setOrders(prev => prev.map(o => {
+        if (o._id === emailingOrder._id) {
+          return {
+            ...o,
+            customer: { ...(o.customer || {}), email: targetEmail }
+          };
+        }
+        return o;
+      }));
+
       addToast(res.data?.message || `Factura enviada a ${targetEmail}`, 'success');
       setShowEmailModal(false);
       setEmailingOrder(null);
     } catch (err) {
-      addToast(err.response?.data?.message || 'Error al enviar la factura por email', 'error');
+      addToast(err.response?.data?.message || 'Error al enviar la factura por email. Puede usar la opción Abrir en Gmail.', 'error');
     } finally {
       setSendingEmail(false);
     }
@@ -538,6 +612,9 @@ export default function Orders() {
                       <td>{formatDate(order.createdAt)}</td>
                       <td>
                         <div style={{ display: 'flex', gap: '4px' }}>
+                          <button className="btn btn-sm btn-secondary" onClick={() => handlePrintTicket(order)} title="Reimprimir Ticket">
+                            <span className="mdi mdi-printer" />
+                          </button>
                           <button className="btn btn-sm btn-secondary" onClick={() => handleViewDetail(order)} title="Ver Detalle">
                             <span className="mdi mdi-eye" />
                           </button>
@@ -645,7 +722,7 @@ export default function Orders() {
             <div className="modal-footer" style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               <button className="btn btn-secondary" onClick={() => handlePrintTicket(selectedOrder)}>
                 <span className="mdi mdi-printer" style={{ marginRight: '4px' }} />
-                Ticket
+                Reimprimir Ticket
               </button>
               <button className="btn btn-primary" onClick={() => handlePrintInvoice(selectedOrder)}>
                 <span className="mdi mdi-file-document" style={{ marginRight: '4px' }} />
@@ -666,32 +743,93 @@ export default function Orders() {
       {/* Enviar Factura por Email Modal */}
       {showEmailModal && emailingOrder && (
         <div className="modal-overlay" onClick={() => setShowEmailModal(false)}>
-          <div className="modal-container" style={{ maxWidth: '420px' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-container" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Enviar Factura por Correo</h2>
               <button className="modal-close-btn mdi mdi-close" onClick={() => setShowEmailModal(false)} />
             </div>
             <form onSubmit={handleSendEmailInvoice}>
-              <div className="modal-body" style={{ padding: '16px' }}>
-                <p style="fontSize: 14px; margin-bottom: 12px;">Se enviará la Factura N° F-{new Date(emailingOrder.createdAt).getFullYear()}/{getOrderNumber(emailingOrder)} con el desglose al siguiente email:</p>
-                <div className="form-group">
-                  <label className="form-label">Correo Electrónico del Cliente</label>
+              <div className="modal-body" style={{ padding: '20px' }}>
+                <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <strong>Factura N° F-{new Date(emailingOrder.createdAt).getFullYear()}/{getOrderNumber(emailingOrder)}</strong>
+                    <span style={{ fontWeight: 'bold', color: 'var(--color-primary)' }}>{formatCurrency(emailingOrder.total)}</span>
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#64748b' }}>
+                    Cliente: <strong>{emailingOrder.customer?.name || 'Cliente'}</strong> {emailingOrder.customer?.nif ? `(${emailingOrder.customer.nif})` : ''}
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '16px' }}>
+                  <label className="form-label" style={{ fontWeight: '600' }}>Correo Electrónico de Destino</label>
                   <input
                     type="email"
                     className="form-input"
                     value={targetEmail}
                     onChange={(e) => setTargetEmail(e.target.value)}
-                    placeholder="cliente@ejemplo.com"
+                    placeholder="ejemplo@correo.com"
+                    autoFocus
                     required
                   />
+                  <small style={{ color: '#64748b', display: 'block', marginTop: '4px' }}>
+                    El correo se asociará automáticamente a la ficha del cliente y del pedido.
+                  </small>
+                </div>
+
+                <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '12px', marginTop: '12px' }}>
+                  <label style={{ fontSize: '12px', color: '#64748b', fontWeight: '600', display: 'block', marginBottom: '8px' }}>
+                    Opciones de Envío Rápido:
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-secondary"
+                      onClick={handleOpenGmail}
+                      title="Abrir redacción en Gmail Web"
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', fontSize: '12px' }}
+                    >
+                      <span className="mdi mdi-google" style={{ color: '#ea4335' }} />
+                      Gmail
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-secondary"
+                      onClick={handleOpenMailto}
+                      title="Abrir cliente de correo predeterminado"
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', fontSize: '12px' }}
+                    >
+                      <span className="mdi mdi-email-send-outline" style={{ color: '#0284c7' }} />
+                      Correo PC
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-secondary"
+                      onClick={handleCopyInvoice}
+                      title="Copiar texto de factura al portapapeles"
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', fontSize: '12px' }}
+                    >
+                      <span className="mdi mdi-content-copy" />
+                      Copiar
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', padding: '16px' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowEmailModal(false)}>
-                  Cancelar
+                  Cerrar
                 </button>
                 <button type="submit" className="btn btn-primary" disabled={sendingEmail}>
-                  {sendingEmail ? 'Enviando...' : 'Enviar Factura'}
+                  {sendingEmail ? (
+                    <>
+                      <div className="spinner spinner-sm" style={{ borderTopColor: 'white', borderColor: 'rgba(255,255,255,0.3)' }} />
+                      Enviando...
+                    </>
+                  ) : (
+                    <>
+                      <span className="mdi mdi-send" style={{ marginRight: '6px' }} />
+                      Enviar Directo
+                    </>
+                  )}
                 </button>
               </div>
             </form>

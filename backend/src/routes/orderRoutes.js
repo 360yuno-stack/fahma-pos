@@ -298,10 +298,9 @@ router.put('/:id', async (req, res) => {
         phone: customer.phone || customer.telefono || '',
         address: customer.address || customer.direccion || ''
       };
-    }
     if (tableId !== undefined) order.table = tableId || null;
-
-    await order.save();
+    if (order.createdAt) order.updatedAt = order.createdAt;
+    await order.save({ timestamps: false });
 
     const populated = await Order.findById(order._id)
       .populate('table', 'name number zone')
@@ -399,20 +398,61 @@ router.post('/:id/email-invoice', async (req, res) => {
       </div>
     `;
 
-    if (process.env.SMTP_USER) {
-      await transporter.sendMail({
-        from: `"${settings.restaurantName || 'EL FOGON DEL AGUILA'}" <${process.env.SMTP_USER}>`,
-        to: recipientEmail,
-        subject: `Factura F-${new Date(order.createdAt).getFullYear()}/${order.orderNumber} - ${settings.restaurantName || 'EL FOGON DEL AGUILA'}`,
-        html: htmlBody
-      });
-      res.json({ success: true, message: `Factura enviada con éxito a ${recipientEmail}` });
+    // Persistir el correo en el cliente del pedido y en la colección de clientes
+    if (recipientEmail && (!order.customer?.email || order.customer.email !== recipientEmail)) {
+      if (!order.customer) order.customer = {};
+      order.customer.email = recipientEmail;
+      if (order.createdAt) order.updatedAt = order.createdAt;
+      await order.save({ timestamps: false });
+
+      try {
+        const Client = require('../models/Client');
+        if (order.customer.nif) {
+          await Client.findOneAndUpdate(
+            { dni_cif: order.customer.nif },
+            { $set: { email: recipientEmail, name: order.customer.name, phone: order.customer.phone, address: order.customer.address } },
+            { upsert: true }
+          );
+        } else if (order.customer.name) {
+          await Client.findOneAndUpdate(
+            { name: order.customer.name },
+            { $set: { email: recipientEmail, phone: order.customer.phone, address: order.customer.address } },
+            { upsert: true }
+          );
+        }
+      } catch (clientErr) {
+        console.error('Error al actualizar cliente:', clientErr.message);
+      }
+    }
+
+    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+      try {
+        await transporter.sendMail({
+          from: `"${settings.restaurantName || 'EL FOGON DEL AGUILA'}" <${process.env.SMTP_USER}>`,
+          to: recipientEmail,
+          subject: `Factura F-${new Date(order.createdAt).getFullYear()}/${order.orderNumber} - ${settings.restaurantName || 'EL FOGON DEL AGUILA'}`,
+          html: htmlBody
+        });
+        return res.json({ success: true, sent: true, message: `Factura enviada con éxito a ${recipientEmail}` });
+      } catch (smtpErr) {
+        console.warn('Aviso: SMTP no pudo enviar el correo directamente:', smtpErr.message);
+        return res.json({ 
+          success: true, 
+          sent: false, 
+          message: `Factura guardada para ${recipientEmail}. Use el botón "Abrir en Gmail" para enviarla desde su cuenta.`,
+          smtpNotice: smtpErr.message
+        });
+      }
     } else {
-      console.log(`[SIMULACIÓN EMAIL FACTURA] Destinatario: ${recipientEmail}\n${htmlBody}`);
-      res.json({ success: true, message: `Factura generada correctamente para ${recipientEmail}` });
+      console.log(`[SIMULACIÓN EMAIL FACTURA] Destinatario: ${recipientEmail}`);
+      res.json({ 
+        success: true, 
+        sent: false, 
+        message: `Factura lista para ${recipientEmail}. Puede enviarla directamente con Gmail.` 
+      });
     }
   } catch (err) {
-    console.error('Error enviando factura por email:', err);
+    console.error('Error procesando factura por email:', err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
