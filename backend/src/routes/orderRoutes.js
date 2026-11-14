@@ -298,6 +298,7 @@ router.put('/:id', async (req, res) => {
         phone: customer.phone || customer.telefono || '',
         address: customer.address || customer.direccion || ''
       };
+    }
     if (tableId !== undefined) order.table = tableId || null;
     if (order.createdAt) order.updatedAt = order.createdAt;
     await order.save({ timestamps: false });
